@@ -1,14 +1,14 @@
 #include <msp430.h> 
 #include <stdbool.h>
 
-#define LED1 0x00
-#define LED2 0x01
+#define LED1 BIT0
+#define LED2 BIT1
 
-#define LEFT 0x01
-#define RIGHT 0x02
-#define CENTER 0x04
-#define UP 0x08
-#define DOWN 010
+#define LEFT BIT1
+#define RIGHT BIT2
+#define CENTER BIT3
+#define UP BIT4
+#define DOWN BIT5
 
 void led_Init(void) {
 	P1DIR |= BIT0 | BIT1;		// Sets P1.0 and P1.1 as output (LED1 and LED2)
@@ -30,6 +30,9 @@ void led_Blink(led_1or2) {
 void joystick_Init(void) {
 	P2DIR &= ~(LEFT | RIGHT | CENTER | UP | DOWN);	// Sets up joystick as input
 	// P2.1 - LEFT, P2.2 - RIGHT, P2.3 - CENTER, P2.4 - UP, DOWN - P2.5
+	// 0 if pushed, 1 if not.
+	P2REN |= LEFT | RIGHT | CENTER | UP | DOWN;
+
 }
 
 void button_Init(void) {
@@ -44,7 +47,7 @@ void TickFct_Latch() {
         break;
 
 	case zero_Correct:
-		if (P2OUT |= UP) {
+		if (P2IN &= ~UP) {
 			LA_State = one_Correct;
 		} else {
 			// stay
@@ -52,39 +55,50 @@ void TickFct_Latch() {
 		break;
 
      case one_Correct:
-		if (P2OUT |= DOWN) {
+		if (P2IN &= ~DOWN) {
 			LA_State = two_Correct;
-		} else {
+		} if (P2IN &= ~(LEFT | RIGHT | CENTER | UP)){
 			LA_State = zero_Correct;
+		} else {
+			LA_State = one_Correct;
 		}
 		break;
 
 	case two_Correct:
-		if (P2OUT |= LEFT) {
+		if (P2IN &= ~LEFT) {
 			LA_State = three_Correct;
-		} else {
+		}
+		if (P2IN &= ~(RIGHT | CENTER | UP | DOWN)) {
 			LA_State = zero_Correct;
+		} else {
+			LA_State = two_Correct;
 		}
 		break;
 
 	case three_Correct:
-		if (P2OUT |= RIGHT) {
+		if (P2IN &= ~RIGHT) {
 			LA_State = four_Correct;
-		} else {
+		}
+		if (P2IN &= ~(LEFT | CENTER | UP | DOWN)) {
 			LA_State = zero_Correct;
+		} else {
+			LA_State = three_Correct;
 		}
 		break;
 
 	case four_Correct:
-		if (P2OUT |= RIGHT) {
+		if (P2IN &= ~RIGHT) {
 			LA_State = all_Correct;
-		} else {
+		}
+		if (P2IN &= ~(LEFT | CENTER | UP | DOWN)) {
 			LA_State = zero_Correct;
+		} else {
+			LA_State = four_Correct;
 		}
 		break;
 
 	case all_Correct:
-		if (P2OUT &= ~(LEFT | RIGHT | CENTER | UP | DOWN)) {
+		if (P2IN &= ~(LEFT | RIGHT | CENTER | UP | DOWN)) {
 			LA_State = zero_Correct;
 		}
 		break;
@@ -97,7 +111,7 @@ void TickFct_Latch() {
 	switch (LA_State) {   // State actions
 		case zero_Correct:
 			P1OUT &= ~LED2;
-			led_Blink(0);
+			P1OUT &= ~LED1;
 			break;
 
 		case one_Correct:
@@ -134,6 +148,10 @@ void TickFct_Latch() {
       TickFct_Latch();
    }
 }*/
+
+
+
+/* NOTES: try putting as |= instead of &= ~ for all inputs
 
 // main.c <Code is UP DOWN LEFT RIGHT RIGHT>
 int main(void) {
