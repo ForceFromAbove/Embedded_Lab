@@ -28,10 +28,11 @@ void led_Blink(led_1or2) {
 }
 
 void joystick_Init(void) {
-	P2DIR &= ~(LEFT | RIGHT | CENTER | UP | DOWN);	// Sets up joystick as input
+		P2DIR &= ~(LEFT | RIGHT | CENTER | UP | DOWN);	// Sets up joystick as input
 	// P2.1 - LEFT, P2.2 - RIGHT, P2.3 - CENTER, P2.4 - UP, DOWN - P2.5
 	// 0 if pushed, 1 if not.
-	P2REN |= LEFT | RIGHT | CENTER | UP | DOWN;
+		P2REN |= LEFT | RIGHT | CENTER | UP | DOWN;
+		P2OUT |= LEFT | RIGHT | CENTER | UP | DOWN;
 
 }
 
@@ -151,7 +152,7 @@ void TickFct_Latch() {
 
 
 
-/* NOTES: try putting as |= instead of &= ~ for all inputs
+// NOTES: try putting as |= instead of &= ~ for all inputs
 
 // main.c <Code is UP DOWN LEFT RIGHT RIGHT>
 int main(void) {
@@ -211,3 +212,4 @@ int main(void) {
 //	}
 	}
 }
+
