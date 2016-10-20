@@ -48,7 +48,7 @@ void TickFct_Latch() {
         break;
 
 	case zero_Correct:
-		if (P2IN &= ~UP) {
+		if (!(P2IN == UP)) {
 			LA_State = one_Correct;
 		} else {
 			// stay
