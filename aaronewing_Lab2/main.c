@@ -1,14 +1,16 @@
 #include <msp430.h> 
 #include <stdbool.h>
+#include <stdint.h>
 
 #define LED1 BIT0
 #define LED2 BIT1
 
-#define LEFT BIT1
-#define RIGHT BIT2
-#define CENTER BIT3
-#define UP BIT4
-#define DOWN BIT5
+#define LEFT 0xFD
+#define RIGHT 0xFB
+#define CENTER 0xF7
+#define UP 0xEF
+#define DOWN 0xDF
+#define no_Input 0xFF
 
 void led_Init(void) {
 	P1DIR |= BIT0 | BIT1;		// Sets P1.0 and P1.1 as output (LED1 and LED2)
@@ -48,7 +50,7 @@ void TickFct_Latch() {
         break;
 
 	case zero_Correct:
-		if (!(P2IN == UP)) {
+		if (P2IN == UP) {
 			LA_State = one_Correct;
 		} else {
 			// stay
@@ -56,12 +58,27 @@ void TickFct_Latch() {
 		break;
 
      case one_Correct:
-		if (P2IN &= ~DOWN) {
-			LA_State = two_Correct;
-		} if (P2IN &= ~(LEFT | RIGHT | CENTER | UP)){
+    	 if (P2IN == LEFT) {
 			LA_State = zero_Correct;
-		} else {
+    	 }
+    	 if (P2IN == RIGHT) {
+			LA_State = zero_Correct;
+		 }
+    	 if (P2IN == CENTER) {
+    	 	LA_State = zero_Correct;
+    	 }
+    	 if (P2IN == UP) {
+    	  	LA_State = zero_Correct;
+    	 }
+		if (P2IN == DOWN) {					// correct
+			LA_State = two_Correct;
+			break;
+		}
+    	 if (P2IN == no_Input) {
 			LA_State = one_Correct;
+		}
+    	else {
+			LA_State = zero_Correct;
 		}
 		break;
 
