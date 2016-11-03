@@ -179,7 +179,13 @@ int main(void) {
     led_Init();
     joystick_Init();
     button_Init();
+
+    initialize_Joystick();		// initialize joystick
     initialize_Clocks();		// initialize clocks
+    initialize_LED();			// initialize LEDs
+    initialize_Switches();		// initialize switches
+    initalize_Ports();
+    initialize_UART();			// initialize UART connection (for PC output)
 
     while (1) {					// run state machine
     	TickFct_Latch();

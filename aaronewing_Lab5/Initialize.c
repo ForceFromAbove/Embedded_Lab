@@ -45,7 +45,7 @@ void initialize_Clocks(void) {								// Sets all clocks to standard position
 		  CSCTL0_H = 0;                             // Lock CS registers
 }
 
-void initialize_Ports(void){			// sets all pins on all ports as an output (except Port 10)
+void initialize_Ports(void) {			// sets all pins on all ports as an output (except Port 10)
 	PM5CTL0 &= ~LOCKLPM5;
 
 	P1DIR |= 0xFFFF;
@@ -71,5 +71,18 @@ void initialize_Ports(void){			// sets all pins on all ports as an output (excep
 	P10OUT = 0x000;
 }
 
+void initialize_LED(void) {
 
+}
 
+void initialize_Switches(void) {
+
+}
+
+void initialize_UART(void) {
+
+}
+
+void initialize_Joystick(void) {
+
+}
