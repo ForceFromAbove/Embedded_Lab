@@ -12,10 +12,6 @@
 #define DOWN 0xDF
 #define no_Input 0xFF
 
-void led_Init(void) {
-	P1DIR |= BIT0 | BIT1;		// Sets P1.0 and P1.1 as output (LED1 and LED2)
-	P1OUT &= ~(BIT0 | BIT1);	// Turns LEDs off
-}
 
 void led_Blink(led_1or2) {
 	if (led_1or2 == 0) {
@@ -29,27 +25,15 @@ void led_Blink(led_1or2) {
 	}
 }
 
-void joystick_Init(void) {
-		P2DIR &= ~(LEFT | RIGHT | CENTER | UP | DOWN);	// Sets up joystick as input
-	// P2.1 - LEFT, P2.2 - RIGHT, P2.3 - CENTER, P2.4 - UP, DOWN - P2.5
-	// 0 if pushed, 1 if not.
-		P2REN |= LEFT | RIGHT | CENTER | UP | DOWN;
-		P2OUT |= LEFT | RIGHT | CENTER | UP | DOWN;
-
-}
-
-void button_Init(void) {
-	P2DIR &= ~(BIT6 | BIT7);	// Init P2.6 and P2.7 as inputs
-}
-
-enum LA_States { LA_SMStart, zero_Correct, one_Correct, two_Correct, three_Correct, four_Correct, all_Correct } LA_State;
+enum LA_States { LA_SMStart, wait_To_Start, start_Experiment, LED, joystick_Input, UART_Write } LA_State;
 void TickFct_Latch() {
   switch(LA_State) {   // Transitions
+  	 default:
      case LA_SMStart:  // Initial transition
         LA_State = zero_Correct;
         break;
 
-	case zero_Correct:
+	case wait_To_Start:
 		if (P2IN == UP) {
 			LA_State = one_Correct;
 		} else {
@@ -57,7 +41,7 @@ void TickFct_Latch() {
 		}
 		break;
 
-     case one_Correct:
+     case start_Experiment:
     	 if (P2IN == LEFT) {
 			LA_State = zero_Correct;
     	 }
@@ -82,7 +66,7 @@ void TickFct_Latch() {
 		}
 		break;
 
-	case two_Correct:
+	case LED:
 		if (P2IN &= ~LEFT) {
 			LA_State = three_Correct;
 		}
@@ -93,7 +77,7 @@ void TickFct_Latch() {
 		}
 		break;
 
-	case three_Correct:
+	case joystick_Input:
 		if (P2IN &= ~RIGHT) {
 			LA_State = four_Correct;
 		}
@@ -104,7 +88,7 @@ void TickFct_Latch() {
 		}
 		break;
 
-	case four_Correct:
+	case UART_Write:
 		if (P2IN &= ~RIGHT) {
 			LA_State = all_Correct;
 		}
@@ -115,15 +99,6 @@ void TickFct_Latch() {
 		}
 		break;
 
-	case all_Correct:
-		if (P2IN &= ~(LEFT | RIGHT | CENTER | UP | DOWN)) {
-			LA_State = zero_Correct;
-		}
-		break;
-
-     default:
-        LA_State = LA_SMStart;
-        break;
   } // Transitions
 
 	switch (LA_State) {   // State actions
@@ -157,17 +132,6 @@ void TickFct_Latch() {
 			break;
 	} // State actions
 }
-// Code is UP DOWN LEFT RIGHT RIGHT
-/*void main() {
-   B = 0x00;              // Initialize outputs
-   LA_State = LA_SMStart; // Indicates initial call
-
-   while(1) {
-      TickFct_Latch();
-   }
-}*/
-
-
 
 // NOTES: try putting as |= instead of &= ~ for all inputs
 

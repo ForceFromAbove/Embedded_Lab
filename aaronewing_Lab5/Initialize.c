@@ -7,6 +7,16 @@
 
 // contains all functions for Initializing MSP430
 
+#define LED1 BIT0
+#define LED2 BIT1
+
+#define LEFT 0xFD
+#define RIGHT 0xFB
+#define CENTER 0xF7
+#define UP 0xEF
+#define DOWN 0xDF
+#define no_Input 0xFF
+
 #include <msp430.h>
 #include "Initialize.h"
 
@@ -72,11 +82,12 @@ void initialize_Ports(void) {			// sets all pins on all ports as an output (exce
 }
 
 void initialize_LED(void) {
-
+	P1DIR |= BIT0 | BIT1;		// Sets P1.0 and P1.1 as output (LED1 and LED2)
+	P1OUT &= ~(BIT0 | BIT1);	// Turns LEDs off
 }
 
 void initialize_Switches(void) {
-
+	P2DIR &= ~(BIT6 | BIT7);	// Init P2.6 and P2.7 as inputs
 }
 
 void initialize_UART(void) {
@@ -84,5 +95,9 @@ void initialize_UART(void) {
 }
 
 void initialize_Joystick(void) {
-
+	P2DIR &= ~(LEFT | RIGHT | CENTER | UP | DOWN);	// Sets up joystick as input
+	// P2.1 - LEFT, P2.2 - RIGHT, P2.3 - CENTER, P2.4 - UP, DOWN - P2.5
+	// 0 if pushed, 1 if not.
+	P2REN |= LEFT | RIGHT | CENTER | UP | DOWN;
+	P2OUT |= LEFT | RIGHT | CENTER | UP | DOWN;
 }
