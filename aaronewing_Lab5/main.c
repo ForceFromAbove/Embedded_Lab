@@ -30,50 +30,26 @@ void TickFct_Latch() {
   switch(LA_State) {   // Transitions
   	 default:
      case LA_SMStart:  // Initial transition
-        LA_State = zero_Correct;
+        LA_State = wait_to_Start;
         break;
 
 	case wait_To_Start:
-		if (P2IN == UP) {
-			LA_State = one_Correct;
+		if (P2IN == BIT6) {						// if Switch 1 is pressed
+			LA_State = start_Experiment;
 		} else {
 			// stay
 		}
 		break;
 
      case start_Experiment:
-    	 if (P2IN == LEFT) {
-			LA_State = zero_Correct;
-    	 }
-    	 if (P2IN == RIGHT) {
-			LA_State = zero_Correct;
-		 }
-    	 if (P2IN == CENTER) {
-    	 	LA_State = zero_Correct;
-    	 }
-    	 if (P2IN == UP) {
-    	  	LA_State = zero_Correct;
-    	 }
-		if (P2IN == DOWN) {					// correct
-			LA_State = two_Correct;
-			break;
-		}
-    	 if (P2IN == no_Input) {
-			LA_State = one_Correct;
-		}
-    	else {
-			LA_State = zero_Correct;
-		}
+		LA_State = LED;
 		break;
 
 	case LED:
-		if (P2IN &= ~LEFT) {
-			LA_State = three_Correct;
-		}
-		if (P2IN &= ~(RIGHT | CENTER | UP | DOWN)) {
-			LA_State = zero_Correct;
+		if (P2IN &= ~RIGHT) {
+			LA_State = joystick_Input;
 		} else {
-			LA_State = two_Correct;
+			// stay
 		}
 		break;
 
