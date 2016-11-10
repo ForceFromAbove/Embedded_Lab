@@ -15,7 +15,6 @@ void initialize_Ports(void);
 void initialize_Clocks(void);
 void initialize_LED(void);
 void initialize_Switches(void);
-void initialize_UART(void);
 void initialize_Interrupts(void);
 
 #endif /* INITIALIZE_H_ */

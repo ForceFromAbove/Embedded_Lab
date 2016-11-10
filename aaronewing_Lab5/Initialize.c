@@ -18,6 +18,8 @@
 #define no_Input 0xFF
 
 #include <msp430.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include "Initialize.h"
 
 void initialize_Clocks(void) {			// Sets all clocks to standard position
@@ -59,32 +61,6 @@ void initialize_Clocks(void) {			// Sets all clocks to standard position
 	} while (SFRIFG1&OFIFG);                   // Test oscillator fault flag
 }
 
-void initialize_Ports(void) {			// sets all pins on all ports as an output (except Port 10)
-/*	PM5CTL0 &= ~LOCKLPM5;
-
-	P1DIR |= 0xFFFF;
-	P2DIR |= 0xFFFF;
-	P3DIR |= 0xFFFF;
-	P4DIR |= 0xFFFF;
-	P5DIR |= 0xFFFF;
-	P6DIR |= 0xFFFF;
-	P7DIR |= 0xFFFF;
-	P8DIR |= 0xFFFF;
-	P9DIR |= 0xFFFF;
-	P10DIR |= 0xFFFF;					// Pins 0, 1, and 2 are the only ones to exist on Port 10
-
-	P1OUT = 0x000;						// sets all pins on all ports to a low output (redundant)
-	P2OUT = 0x000;
-	P3OUT = 0x000;
-	P4OUT = 0x000;
-	P5OUT = 0x000;
-	P6OUT = 0x000;
-	P7OUT = 0x000;
-	P8OUT = 0x000;
-	P9OUT = 0x000;
-	P10OUT = 0x000; */
-}
-
 void initialize_LED(void) {
 	P1DIR |= BIT0 | BIT1;		// Sets P1.0 and P1.1 as output (LED1 and LED2)
 	P1OUT &= ~(BIT0 | BIT1);	// Turns LEDs off
@@ -94,8 +70,73 @@ void initialize_Switches(void) {
 	P2DIR &= ~(BIT6 | BIT7);	// Init P2.6 and P2.7 as inputs
 }
 
-void initialize_UART(void) {
+void initialize_UART (bool baud_Rate, uint8_t pin_Setting) {
+	switch (pin_Setting) {
+	case 0:
+		// Configure Secondary Function Pins
+		P2SEL0 |= BIT0 | BIT1;					// P2.0 - TX, P2.1 - RX
+		P2SEL1 &= ~(BIT0 | BIT1);
 
+		break;
+
+	case 1:
+		// Configure Secondary Function Pins
+		P3SEL0 |= BIT4 | BIT5;                    // P3.4 - TX, P3.5 - RX
+		P4SEL1 &= ~(BIT4 | BIT5);
+
+		break;
+
+	default:
+		// Configure Secondary Function Pins
+		P2SEL0 |= BIT0 | BIT1;                    // P2.0 - TX, P2.1 - RX
+		P2SEL1 &= ~(BIT0 | BIT1);
+
+		P1SEL0 &= ~UART_RADIO_BUSY;
+		P1SEL1 &= ~UART_RADIO_BUSY;				// P1.4 - Radio Busy line
+		P1DIR &= ~UART_RADIO_BUSY;
+		P1IN &= ~UART_RADIO_BUSY;
+		break;
+}
+
+	 // XT1 Setup
+	CSCTL0_H = CSKEY >> 8;                		// Unlock CS registers
+	CSCTL1 = DCOFSEL_0;							// Set DCO to 1MHz
+	CSCTL2 = SELA__LFXTCLK | SELS__DCOCLK | SELM__DCOCLK;
+	CSCTL0_H = 0;                             	// Lock CS registers
+
+	// Configure USCI_A0 for SPI operation
+	UCA0CTL1 |= UCSWRST;                      		// **Put state machine in reset**
+
+	switch (baud_Rate) {
+	case 0:
+				// Configure Timer for 9600 Baud
+		UCA0CTL1 = UCSSEL__ACLK;                  // Set ACLK = 32768 as UCBRCLK
+		UCA0BR0 = 3;                              // 9600 baud
+		UCA0MCTLW |= 0x5300;                      // 32768/9600 - INT(32768/9600)=0.41
+		                                          // UCBRSx value = 0x53 (See UG)
+		UCA0BR1 = 0;
+	 	break;
+
+	case 1:
+				// Configure Timer for 38400 Baud
+		UCA0CTL1 = UCSSEL__SMCLK;                 	// Set SMCLK = 1000000 as UCBRCLK
+		UCA0BR0 = 0x1A;								// 9600 baud
+		UCA0MCTLW |= 0x0100;                 // 1000000/38400 - INT(1000000/38400)=0.04
+		                                          	// UCBRSx value = 0x01 (See UG)
+											// N = 0.0529, effectively 38,383.4 Baud
+		UCA0BR1 = 0;
+	 	break;
+
+	default:
+					// Configure Timer for 9600 Baud
+		UCA0CTL1 = UCSSEL__ACLK;                  // Set ACLK = 32768 as UCBRCLK
+		UCA0BR0 = 3;                              // 9600 baud
+		UCA0MCTLW |= 0x5300;                      // 32768/9600 - INT(32768/9600)=0.41
+		                                          // UCBRSx value = 0x53 (See UG)
+		UCA0BR1 = 0;
+		break;
+	}
+	UCA0CTL1 &= ~UCSWRST;                    	 // release from reset                   	 	// **Initialize USCI state machine**
 }
 
 void initialize_Joystick(void) {
@@ -112,39 +153,4 @@ void initialize_Interrupts(void) {
 	__bis_SR_register(GIE);       // enable interrupt
 }
 
-// old MakerSat code
-/*
 
-PJSEL0 |= BIT4 | BIT5;      // For XT1
-
-// Disable the GPIO power-on default high-impedance mode to activate
-// previously configured port settings
-
-
-/*	CSCTL0_H = CSKEY >> 8;                    // Unlock CS registers (allows for change in clock)
-CSCTL1 = DCOFSEL_6;                       // Set DCO to 8MHz (option to go to 16 MHz but FRAM doesn't like above 8MHz)
-CSCTL2 = SELA__LFXTCLK | SELS__HFXTCLK | SELM__DCOCLK;
-CSCTL3 = DIVA__1 | DIVS__1 | DIVM__1;     // Set all dividers to 1 (all CLKS at highest frequency)
-CSCTL4 |= LFXTDRIVE_3 | HFXTDRIVE_3;
-CSCTL4 &= ~(LFXTOFF | HFXTOFF);
-/*	do
-{
-	CSCTL5 &= ~LFXTOFFG;       	// Clear XT1 fault flag
-    SFRIFG1 &= ~OFIFG;
-}while (SFRIFG1&OFIFG);                 	  // Test oscillator fault flag /
-	CSCTL0_H = 0;                             // Lock CS registers (does not allow change in clock) /
-
-// XT1 Setup
- CSCTL0_H = CSKEY >> 8;                    // Unlock CS registers
-CSCTL1 = DCOFSEL_0;                       // Set DCO to 1MHz
-	  CSCTL2 = SELA__LFXTCLK | SELS__DCOCLK | SELM__DCOCLK;
-	  CSCTL3 = DIVA__1 | DIVS__1 | DIVM__1;     // set all dividers
-	  CSCTL4 &= ~LFXTOFF;
-	  do
-	  {
-	    CSCTL5 &= ~LFXTOFFG;                    // Clear XT1 fault flag
-	    SFRIFG1 &= ~OFIFG;
-	  }while (SFRIFG1&OFIFG);                   // Test oscillator fault flag
-	  CSCTL0_H = 0;                             // Lock CS registers
-}
-*/
