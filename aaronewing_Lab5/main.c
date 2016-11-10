@@ -2,6 +2,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "Initialize.h"
+#include "Timers.h"
+
 #define LED1 BIT0
 #define LED2 BIT1
 
@@ -25,6 +28,84 @@ void led_Blink(led_1or2) {
 	}
 }
 
+enum Timer_States { random_Timer, LED_Timer, reaction_Timer } Timer_State;
+void TickFct_Timer() {
+	switch(Timer_State) {   // Transitions
+  		default:
+  		case random_Timer:  // Initial transition
+  			Timer_State = LED_Timer;
+  			break;
+
+  		case LED_Timer:
+  			//if (P2IN == BIT6) {						// if Switch 1 is pressed *interrupt*
+  			Timer_State = reaction_Timer;
+			} else {
+				// stay
+			}
+			break;
+
+		case reaction_Timer:
+			// do nothing go to interrupt 					timer A0 interrupt to turn on LED
+			Timer_State = random_Timer;
+			break;
+
+
+	switch (Timer_State) {   // State actions
+		default:
+		case random_Timer:
+			// run continous timer for rand number
+			led_Blink(0);
+			break;
+
+		case LED_Timer:
+			led_Blink(0);
+			break;
+
+		case reaction_Timer:
+			led_Blink(0);
+			break;
+	} // State actions
+
+enum LA_States { wait_For_Start, reaction_Time, UART_Transmission } LA_State;
+void TickFct_Latch() {
+	switch(LA_State) {   // Transitions
+		default:
+		case wait_For_Start:  // Initial transition
+			// if switch 1
+				LA_State = reaction_Time;
+			break;
+
+		case reaction_Time:
+			//if (P2IN == BIT6) {						// if 3rd timer tripped
+				LA_State = UART_Transmission;
+			} else {
+				// stay
+			}
+			break;
+
+		case UART_Transmission:
+			// do nothing go to interrupt 					when done with UART
+			LA_State = wait_For_Start;
+			break;
+
+
+	switch (LA_State) {   // State actions
+		default:
+		case wait_For_Start:
+			// run continous timer for rand number
+			led_Blink(0);
+			break;
+
+		case reaction_Time:
+			led_Blink(0);
+			break;
+
+		case UART_Transmission:
+			led_Blink(0);
+			break;
+		} // State actions
+
+/*
 enum LA_States { LA_SMStart, wait_To_Start, start_Experiment, LED, joystick_Input, UART_Write } LA_State;
 void TickFct_Latch() {
   switch(LA_State) {   // Transitions
@@ -34,7 +115,7 @@ void TickFct_Latch() {
         break;
 
 	case wait_To_Start:
-		if (P2IN == BIT6) {						// if Switch 1 is pressed
+		//if (P2IN == BIT6) {						// if Switch 1 is pressed *interrupt*
 			LA_State = start_Experiment;
 		} else {
 			// stay
@@ -42,7 +123,7 @@ void TickFct_Latch() {
 		break;
 
      case start_Experiment:
-		LA_State = LED;
+    	 // do nothing go to interrupt 					timer A0 interrupt to turn on LED
 		break;
 
 	case LED:
@@ -78,40 +159,30 @@ void TickFct_Latch() {
   } // Transitions
 
 	switch (LA_State) {   // State actions
-		case zero_Correct:
-			P1OUT &= ~LED2;
-			P1OUT &= ~LED1;
-			break;
-
-		case one_Correct:
+		default:
+		case wait_To_Start:
+			// run continous timer for rand number
 			led_Blink(0);
 			break;
 
-		case two_Correct:
+		case start_Experiment:
 			led_Blink(0);
 			break;
 
-		case three_Correct:
+		case LED:
 			led_Blink(0);
 			break;
 
-		case four_Correct:
+		case joystick_Input:
 			led_Blink(0);
 		break;
 
-		case all_Correct:
+		case UART_Write:
 			P1OUT |= LED2;
 			led_Blink(0);
 			break;
-
-		default:
-			break;
 	} // State actions
-}
-
-// NOTES: try putting as |= instead of &= ~ for all inputs
-
-// main.c <Code is UP DOWN LEFT RIGHT RIGHT>
+} */
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
 
@@ -121,59 +192,34 @@ int main(void) {
     button_Init();
 
     initialize_Joystick();		// initialize joystick
-    initialize_Clocks();		// initialize clocks
+    initialize_Clocks();		// initialize clocks & export to test pins P11.0 to P11.2
     initialize_LED();			// initialize LEDs
     initialize_Switches();		// initialize switches
     initalize_Ports();
     initialize_UART();			// initialize UART connection (for PC output)
+    initialize_Interrupts();	// sets up and enables all interrupts
+    initialize_TimerA1();		// initialize timer for A1
 
     while (1) {					// run state machine
     	TickFct_Latch();
     }
-
-    // The LOCK is UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT
-	
-	while (1) {
-//		switch (P2OUT) {
-		if (P2OUT == BIT1) {	// LEFT
-			led_Blink(0);
-		}
-		if (P2OUT == BIT2) {	// RIGHT
-			led_Blink(0);
-		}
-		if (P2OUT == BIT3) {	// CENTER
-			led_Blink(0);
-		}
-		if (P2OUT == BIT4) {	// UP
-			led_Blink(0);
-			while (P2OUT &= ~BIT4) {
-				if (P2OUT == BIT4) {	// UP again
-					led_Blink(0);
-					while (P2OUT &= ~BIT4) {
-						if (P2OUT == BIT1) {	// LEFT
-						led_Blink(0);
-						while (P2OUT &= ~BIT1) {
-							if (P2OUT == BIT2) {	// RIGHT again
-							led_Blink(0);
-							while (P2OUT &= ~BIT2) {
-								if (P2OUT == BIT4) {	// LEFT again
-									P1OUT |= BIT1;
-									led_Blink(0);
-								}
-							}
-							}
-						}
-						}
-					}
-				}
-			}
-		}
-		if (P2OUT == BIT5) {	// DOWN
-			led_Blink(0);
-		} else {
-			led_Blink(0);
-		}
-//	}
-	}
 }
 
+// Port 2 interrupt service routine
+#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
+#pragma vector=PORT2_VECTOR
+__interrupt void Port_2(void)
+#elif defined(__GNUC__)
+void __attribute__ ((interrupt(PORT1_VECTOR))) Port_1 (void)
+#else
+#error Compiler not supported!
+#endif
+switch(__even_in_range(P2IV,14)) {
+	case 4:break;                             	// P2.1
+	case 6:break;								// P2.2
+	case 14:									// P2.6
+		//start timer
+		initialize_TimerA0();			// initialize timer for A2
+		LA_State = start_Experiment;	// go to Start_Experiment
+	default: break;
+}
