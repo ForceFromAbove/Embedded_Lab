@@ -17,6 +17,8 @@ void initialize_TimerB0(void) {
 	TB0CCTL0 = CCIE;                          	// CCR0 interrupt enabled
 	TB0CCR0 = (32768 + TA1R);					// count up to 1 second + whatever TimerA1 counted to before switch 1 was pressed
 	TB0CTL = TASSEL_0 + MC_1 + TACLR;         	// ACLK, up mode, clear TAR
+
+	//when joystick is pressed, do TB0CTL = MC_0; to pause, and then grab number.
 }
 
 // timer for getting reaction time (up)
