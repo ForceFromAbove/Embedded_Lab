@@ -16,9 +16,9 @@ void TickFct_Timer() {
   		case LED_Timer:
   			//if (P2IN == BIT6) {						// if Switch 1 is pressed *interrupt*
   			Timer_State = reaction_Timer;
-			} else {
+	//		} else {
 				// stay
-			}
+	//		}
 			break;
 
 		case reaction_Timer:
@@ -42,6 +42,8 @@ void TickFct_Timer() {
 			led_Blink(0);
 			break;
 	} // State actions
+	}
+}
 
 enum LA_States { wait_For_Start, reaction_Time, UART_Transmission } LA_State;
 void TickFct_Latch() {
@@ -55,9 +57,9 @@ void TickFct_Latch() {
 		case reaction_Time:
 			//if (P2IN == BIT6) {						// if 3rd timer tripped
 				LA_State = UART_Transmission;
-			} else {
+	//		} else {
 				// stay
-			}
+	//		}
 			break;
 
 		case UART_Transmission:
@@ -78,10 +80,13 @@ void TickFct_Latch() {
 			break;
 
 		case UART_Transmission:
+			// convert time to ms
+			// transmit through UART
 			led_Blink(0);
 			break;
 		} // State actions
-
+	}
+}
 
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer

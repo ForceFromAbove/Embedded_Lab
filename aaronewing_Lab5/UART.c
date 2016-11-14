@@ -5,6 +5,13 @@
  *      Author: aaronewing
  */
 
+#include <msp430.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include "UART.h"
+
+uint8_t RX_Data = 0;
+
 void initialize_UART(bool baud_Rate, uint8_t pin_Setting) {
 	switch (pin_Setting) {
 	default:
@@ -22,7 +29,7 @@ void initialize_UART(bool baud_Rate, uint8_t pin_Setting) {
 			// Configure Timer for 9600 Baud
 			UCA0CTL1 = UCSSEL__ACLK;              // Set ACLK = 32768 as UCBRCLK
 			UCA0BR0 = 3;                              // 9600 baud
-			UCA0MCTLW |= 0x5300;            // 32768/9600 - INT(32768/9600)=0.41
+			UCA0MCTL |= 0x5300;            // 32768/9600 - INT(32768/9600)=0.41
 											// UCBRSx value = 0x53 (See UG)
 			UCA0BR1 = 0;
 			break;
@@ -32,7 +39,7 @@ void initialize_UART(bool baud_Rate, uint8_t pin_Setting) {
 			// Configure Timer for 38400 Baud
 			UCA0CTL1 = UCSSEL__SMCLK;          // Set SMCLK = 1000000 as UCBRCLK
 			UCA0BR0 = 0x1A;								// 9600 baud
-			UCA0MCTLW |= 0x0100;      // 1000000/38400 - INT(1000000/38400)=0.04
+			UCA0MCTL |= 0x0100;      // 1000000/38400 - INT(1000000/38400)=0.04
 									  // UCBRSx value = 0x01 (See UG)
 			// N = 0.0529, effectively 38,383.4 Baud
 			UCA0BR1 = 0;
@@ -56,7 +63,7 @@ void initialize_UART(bool baud_Rate, uint8_t pin_Setting) {
 			// Configure Timer for 9600 Baud
 			UCA1CTL1 = UCSSEL__ACLK;              // Set ACLK = 32768 as UCBRCLK
 			UCA1BR0 = 3;                              // 9600 baud
-			UCA1MCTLW |= 0x5300;            // 32768/9600 - INT(32768/9600)=0.41
+			UCA1MCTL |= 0x5300;            // 32768/9600 - INT(32768/9600)=0.41
 											// UCBRSx value = 0x53 (See UG)
 			UCA1BR1 = 0;
 			break;
@@ -66,7 +73,7 @@ void initialize_UART(bool baud_Rate, uint8_t pin_Setting) {
 			// Configure Timer for 38400 Baud
 			UCA1CTL1 = UCSSEL__SMCLK;          // Set SMCLK = 1000000 as UCBRCLK
 			UCA1BR0 = 0x1A;								// 9600 baud
-			UCA1MCTLW |= 0x0100;      // 1000000/38400 - INT(1000000/38400)=0.04
+			UCA1MCTL |= 0x0100;      // 1000000/38400 - INT(1000000/38400)=0.04
 									  // UCBRSx value = 0x01 (See UG)
 			// N = 0.0529, effectively 38,383.4 Baud
 			UCA1BR1 = 0;
@@ -89,7 +96,7 @@ void initialize_UART(bool baud_Rate, uint8_t pin_Setting) {
 			// Configure Timer for 9600 Baud
 			UCA2CTL1 = UCSSEL__ACLK;              // Set ACLK = 32768 as UCBRCLK
 			UCA2BR0 = 3;                              // 9600 baud
-			UCA2MCTLW |= 0x5300;            // 32768/9600 - INT(32768/9600)=0.41
+			UCA2MCTL |= 0x5300;            // 32768/9600 - INT(32768/9600)=0.41
 											// UCBRSx value = 0x53 (See UG)
 			UCA2BR1 = 0;
 			break;
@@ -99,7 +106,7 @@ void initialize_UART(bool baud_Rate, uint8_t pin_Setting) {
 			// Configure Timer for 38400 Baud
 			UCA2CTL1 = UCSSEL__SMCLK;          // Set SMCLK = 1000000 as UCBRCLK
 			UCA2BR0 = 0x1A;								// 9600 baud
-			UCA2MCTLW |= 0x0100;      // 1000000/38400 - INT(1000000/38400)=0.04
+			UCA2MCTL |= 0x0100;      // 1000000/38400 - INT(1000000/38400)=0.04
 									  // UCBRSx value = 0x01 (See UG)
 			// N = 0.0529, effectively 38,383.4 Baud
 			UCA2BR1 = 0;
@@ -122,7 +129,7 @@ void initialize_UART(bool baud_Rate, uint8_t pin_Setting) {
 			// Configure Timer for 9600 Baud
 			UCA3CTL1 = UCSSEL__ACLK;              // Set ACLK = 32768 as UCBRCLK
 			UCA3BR0 = 3;                              // 9600 baud
-			UCA3MCTLW |= 0x5300;            // 32768/9600 - INT(32768/9600)=0.41
+			UCA3MCTL |= 0x5300;            // 32768/9600 - INT(32768/9600)=0.41
 											// UCBRSx value = 0x53 (See UG)
 			UCA3BR1 = 0;
 			break;
@@ -132,7 +139,7 @@ void initialize_UART(bool baud_Rate, uint8_t pin_Setting) {
 			// Configure Timer for 38400 Baud
 			UCA3CTL1 = UCSSEL__SMCLK;          // Set SMCLK = 1000000 as UCBRCLK
 			UCA3BR0 = 0x1A;								// 9600 baud
-			UCA3MCTLW |= 0x0100;      // 1000000/38400 - INT(1000000/38400)=0.04
+			UCA3MCTL |= 0x0100;      // 1000000/38400 - INT(1000000/38400)=0.04
 									  // UCBRSx value = 0x01 (See UG)
 			// N = 0.0529, effectively 38,383.4 Baud
 			UCA3BR1 = 0;
@@ -165,12 +172,12 @@ void write_UART(uint8_t TX_Data, uint8_t pin_Setting) {
 		while (!(UCA3IFG & UCTXIFG)) {};					// If able to TX
 		UCA3TXBUF = TX_Data;							// 8 bits transmitted
 		break;
+	}
 }
 
 ////////////////////// UART READ POLLING //////////////////////////////////
 uint8_t read_UART(void) {
-	while (!(UCA0IFG & UCRXIFG)) {
-	};    			// While RX flag is high
+	while (!(UCA0IFG & UCRXIFG)) {};    			// While RX flag is high
 	RX_Data = UCA0RXBUF;							// Recieve Radio ACK
 	return RX_Data;
 }

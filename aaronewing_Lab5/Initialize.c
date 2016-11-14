@@ -7,6 +7,11 @@
 
 // contains all functions for Initializing MSP430
 
+#include <msp430.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include "Initialize.h"
+
 #define LED1 BIT0
 #define LED2 BIT1
 
@@ -16,11 +21,6 @@
 #define UP 0xEF
 #define DOWN 0xDF
 #define no_Input 0xFF
-
-#include <msp430.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include "Initialize.h"
 
 void initialize_Clocks(void) {			// Sets all clocks to standard position
 
@@ -33,10 +33,11 @@ void initialize_Clocks(void) {			// Sets all clocks to standard position
 	UCSCTL6 |= XCAP_3;                        // Internal load cap
 
 // Loop until XT1 fault flag is cleared
+	/*
 	do {
 		UCSCTL7 &= ~XT1LFOFFG;                  // Clear XT1 fault flags
 	} while (UCSCTL7 & XT1LFOFFG);               // Test XT1 fault flag
-}
+} */
 
 // Initialize DCO to 16MHz
 	__bis_SR_register(SCG0);			// Disable the FLL control loop
@@ -68,75 +69,6 @@ void initialize_LED(void) {
 
 void initialize_Switches(void) {
 	P2DIR &= ~(BIT6 | BIT7);	// Init P2.6 and P2.7 as inputs
-}
-
-void initialize_UART (bool baud_Rate, uint8_t pin_Setting) {
-	switch (pin_Setting) {
-	case 0:
-		// Configure Secondary Function Pins
-		P2SEL0 |= BIT0 | BIT1;					// P2.0 - TX, P2.1 - RX
-		P2SEL1 &= ~(BIT0 | BIT1);
-
-		break;
-
-	case 1:
-		// Configure Secondary Function Pins
-		P3SEL0 |= BIT4 | BIT5;                    // P3.4 - TX, P3.5 - RX
-		P4SEL1 &= ~(BIT4 | BIT5);
-
-		break;
-
-	default:
-		// Configure Secondary Function Pins
-		P2SEL0 |= BIT0 | BIT1;                    // P2.0 - TX, P2.1 - RX
-		P2SEL1 &= ~(BIT0 | BIT1);
-
-		P1SEL0 &= ~UART_RADIO_BUSY;
-		P1SEL1 &= ~UART_RADIO_BUSY;				// P1.4 - Radio Busy line
-		P1DIR &= ~UART_RADIO_BUSY;
-		P1IN &= ~UART_RADIO_BUSY;
-		break;
-}
-
-	 // XT1 Setup
-	CSCTL0_H = CSKEY >> 8;                		// Unlock CS registers
-	CSCTL1 = DCOFSEL_0;							// Set DCO to 1MHz
-	CSCTL2 = SELA__LFXTCLK | SELS__DCOCLK | SELM__DCOCLK;
-	CSCTL0_H = 0;                             	// Lock CS registers
-
-	// Configure USCI_A0 for SPI operation
-	UCA0CTL1 |= UCSWRST;                      		// **Put state machine in reset**
-
-	switch (baud_Rate) {
-	case 0:
-				// Configure Timer for 9600 Baud
-		UCA0CTL1 = UCSSEL__ACLK;                  // Set ACLK = 32768 as UCBRCLK
-		UCA0BR0 = 3;                              // 9600 baud
-		UCA0MCTLW |= 0x5300;                      // 32768/9600 - INT(32768/9600)=0.41
-		                                          // UCBRSx value = 0x53 (See UG)
-		UCA0BR1 = 0;
-	 	break;
-
-	case 1:
-				// Configure Timer for 38400 Baud
-		UCA0CTL1 = UCSSEL__SMCLK;                 	// Set SMCLK = 1000000 as UCBRCLK
-		UCA0BR0 = 0x1A;								// 9600 baud
-		UCA0MCTLW |= 0x0100;                 // 1000000/38400 - INT(1000000/38400)=0.04
-		                                          	// UCBRSx value = 0x01 (See UG)
-											// N = 0.0529, effectively 38,383.4 Baud
-		UCA0BR1 = 0;
-	 	break;
-
-	default:
-					// Configure Timer for 9600 Baud
-		UCA0CTL1 = UCSSEL__ACLK;                  // Set ACLK = 32768 as UCBRCLK
-		UCA0BR0 = 3;                              // 9600 baud
-		UCA0MCTLW |= 0x5300;                      // 32768/9600 - INT(32768/9600)=0.41
-		                                          // UCBRSx value = 0x53 (See UG)
-		UCA0BR1 = 0;
-		break;
-	}
-	UCA0CTL1 &= ~UCSWRST;                    	 // release from reset                   	 	// **Initialize USCI state machine**
 }
 
 void initialize_Joystick(void) {

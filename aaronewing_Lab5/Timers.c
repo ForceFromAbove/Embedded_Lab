@@ -5,6 +5,11 @@
  *      Author: aaronewing
  */
 
+#include <msp430.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include "Timers.h"
+
 // timer for "random" (continuous)
 void initialize_TimerA0(void) {
 	TA0CCTL0 = CCIE;                          	// CCR0 interrupt enabled
