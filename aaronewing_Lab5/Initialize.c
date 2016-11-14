@@ -56,10 +56,10 @@ void initialize_Clocks(void) {			// Sets all clocks to standard position
 	__delay_cycles(76563);
 
 	// Loop until XT1,XT2 & DCO fault flag is cleared
-	do {
+/*	do {
 		UCSCTL7 &= ~(XT2OFFG + XT1LFOFFG + XT1HFOFFG + DCOFFG); // Clear XT2,XT1,DCO fault flags
 		SFRIFG1 &= ~OFIFG;// Clear fault flags
-	} while (SFRIFG1&OFIFG);                   // Test oscillator fault flag
+	} while (SFRIFG1&OFIFG);                   // Test oscillator fault flag */
 }
 
 void initialize_LED(void) {

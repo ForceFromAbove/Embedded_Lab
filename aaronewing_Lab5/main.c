@@ -5,6 +5,12 @@
 #include "Initialize.h"
 #include "Timers.h"
 
+bool joystick_Flag = 0;
+bool switch_Flag = 0;
+bool TimerA0_Flag = 0;
+bool TimerA1_Flag = 0;
+bool TimerB0_Flag = 0;
+
 enum Timer_States { random_Timer, LED_Timer, reaction_Timer } Timer_State;
 void TickFct_Timer() {
 	switch(Timer_State) {   // Transitions
@@ -50,9 +56,12 @@ void TickFct_Latch() {
 	switch(LA_State) {   // Transitions
 		default:
 		case wait_For_Start:  // Initial transition
-			// if switch 1
+			 if (switch_Flag) {
 				LA_State = reaction_Time;
-			break;
+			 } else {
+				 // quack
+			 }
+			 break;
 
 		case reaction_Time:
 			//if (P2IN == BIT6) {						// if 3rd timer tripped
@@ -95,7 +104,7 @@ int main(void) {
     initialize_Clocks();		// initialize clocks & export to test pins P11.0 to P11.2
     initialize_LED();			// initialize LEDs
     initialize_Switches();		// initialize switches
-    initialize_UART();			// initialize UART connection (for PC output)
+    initialize_UART(0,0);		// initialize UART connection (for PC output)
     initialize_Interrupts();	// sets up and enables all interrupts
     initialize_TimerA0();		// initialize timer for A1
     initialize_TimerA1();		// initialize timer for A1
@@ -115,12 +124,17 @@ void __attribute__ ((interrupt(PORT1_VECTOR))) Port_1 (void)
 #else
 #error Compiler not supported!
 #endif
-switch(__even_in_range(P2IV,14)) {
-	case 4:break;                             	// P2.1
-	case 6:break;								// P2.2
+{
+	switch (__even_in_range(P2IV, 14)) {
+	case 4:										// P2.1
+		break;
+	case 6:										// P2.2
+		break;
 	case 14:									// P2.6
 		//start timer
 		initialize_TimerA0();			// initialize timer for A2
-		LA_State = start_Experiment;	// go to Start_Experiment
-	default: break;
+		switch_Flag = 1;				// go to Start_Experiment
+	default:
+		break;
+	}
 }
