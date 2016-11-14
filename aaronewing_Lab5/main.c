@@ -143,9 +143,6 @@ void __attribute__ ((interrupt(PORT1_VECTOR))) Port_1 (void)
 		//start timer
 		initialize_TimerB0();			// initialize timer for A2
 		switch_Flag = 1;				// go to Start_Experiment
-		P1OUT |= BIT0;
-		__delay_cycles(16000000);
-		P1OUT &= ~BIT0;
 	default:
 		break;
 	}
@@ -161,14 +158,15 @@ void __attribute__ ((interrupt(TIMERB1_VECTOR))) TIMERB1_ISR (void)
 #error Compiler not supported!
 #endif
 {
-	P1DIR |= BIT1;
+	P1OUT |= BIT0;
+	__delay_cycles(16000000);
+	P1OUT &= ~BIT0;
   /* Any access, read or write, of the TBIV register automatically resets the
   highest "pending" interrupt flag. */
   switch( __even_in_range(TBIV,14) ) {
     case  0: break;                          // No interrupt
     case  2:
     	TB0CTL = MC_0;						// pause B0 timer
-    	P1OUT |= BIT0;
     	break;                          // CCR1 not used
     case  4: break;                          // CCR2 not used
     case  6: break;                          // CCR3 not used
@@ -179,4 +177,17 @@ void __attribute__ ((interrupt(TIMERB1_VECTOR))) TIMERB1_ISR (void)
             break;
     default: break;
   }
+}
+
+// Timer A0 interrupt service routine
+#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
+#pragma vector=TIMER1_A0_VECTOR
+__interrupt void TIMER1_A0_ISR(void)
+#elif defined(__GNUC__)
+void __attribute__ ((interrupt(TIMER1_A0_VECTOR))) TIMER1_A0_ISR (void)
+#else
+#error Compiler not supported!
+#endif
+{
+  P1OUT ^= 0x01;                            // Toggle P1.0
 }
