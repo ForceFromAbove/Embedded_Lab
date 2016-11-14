@@ -7,24 +7,32 @@
 
 bool joystick_Flag = 0;
 bool switch_Flag = 0;
-bool TimerA0_Flag = 0;
+bool TimerA0_Flag = 1;
 bool TimerA1_Flag = 0;
 bool TimerB0_Flag = 0;
+
+uint16_t random_Time = 0;
+uint16_t reaction_Time = 0;
 
 enum Timer_States { random_Timer, LED_Timer, reaction_Timer } Timer_State;
 void TickFct_Timer() {
 	switch(Timer_State) {   // Transitions
   		default:
   		case random_Timer:  // Initial transition
-  			Timer_State = LED_Timer;
+  			if (TimerA0_Flag) {
+  				// stay
+  				Timer_State = random_Timer;
+  			} else {
+  				Timer_State = LED_Timer;
+  			}
   			break;
 
   		case LED_Timer:
-  			//if (P2IN == BIT6) {						// if Switch 1 is pressed *interrupt*
+  			if (TimerB0_Flag) {						// if random timer goes off (B0)
   			Timer_State = reaction_Timer;
-	//		} else {
+			} else {
 				// stay
-	//		}
+			}
 			break;
 
 		case reaction_Timer:
@@ -36,8 +44,8 @@ void TickFct_Timer() {
 	switch (Timer_State) {   // State actions
 		default:
 		case random_Timer:
-			// run continous timer for rand number
-			led_Blink(0);
+			initialize_TimerA0();		// initialize timer for A1 (continous timer for random number)
+			TimerA0_Flag = 0;
 			break;
 
 		case LED_Timer:
@@ -51,24 +59,24 @@ void TickFct_Timer() {
 	}
 }
 
-enum LA_States { wait_For_Start, reaction_Time, UART_Transmission } LA_State;
+enum LA_States { wait_For_Start, reaction, UART_Transmission } LA_State;
 void TickFct_Latch() {
 	switch(LA_State) {   // Transitions
 		default:
 		case wait_For_Start:  // Initial transition
 			 if (switch_Flag) {
-				LA_State = reaction_Time;
+				LA_State = reaction;
 			 } else {
 				 // quack
 			 }
 			 break;
 
-		case reaction_Time:
-			//if (P2IN == BIT6) {						// if 3rd timer tripped
+		case reaction:
+			if (TimerB0_Flag) {						// if 3rd timer tripped
 				LA_State = UART_Transmission;
-	//		} else {
+			} else {
 				// stay
-	//		}
+			}
 			break;
 
 		case UART_Transmission:
@@ -81,11 +89,12 @@ void TickFct_Latch() {
 		default:
 		case wait_For_Start:
 			// run continous timer for rand number
-			led_Blink(0);
+//			random_Time = TA0R;			// grabs random time from TA0 <might not be needed>
+			// do nothing?
 			break;
 
-		case reaction_Time:
-			led_Blink(0);
+		case reaction:
+		//	led_Blink(0);
 			break;
 
 		case UART_Transmission:
@@ -106,16 +115,15 @@ int main(void) {
     initialize_Switches();		// initialize switches
     initialize_UART(0,0);		// initialize UART connection (for PC output)
     initialize_Interrupts();	// sets up and enables all interrupts
-    initialize_TimerA0();		// initialize timer for A1
-    initialize_TimerA1();		// initialize timer for A1
-    initialize_TimerB0();		// initialize timer for A1
+//    initialize_TimerA1();		// initialize timer for A1
 
     while (1) {					// run state machine
+    	TickFct_Timer();
     	TickFct_Latch();
     }
 }
 
-// Port 2 interrupt service routine
+// Port 2 interrupt service routine for Switch 1/joystick
 #if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
 #pragma vector=PORT2_VECTOR
 __interrupt void Port_2(void)
@@ -127,14 +135,48 @@ void __attribute__ ((interrupt(PORT1_VECTOR))) Port_1 (void)
 {
 	switch (__even_in_range(P2IV, 14)) {
 	case 4:										// P2.1
-		break;
 	case 6:										// P2.2
+		TA1CTL = MC_0;						// pause A1 timer
+		TA1R = reaction_Time;				// reaction time in clock cycles
 		break;
 	case 14:									// P2.6
 		//start timer
-		initialize_TimerA0();			// initialize timer for A2
+		initialize_TimerB0();			// initialize timer for A2
 		switch_Flag = 1;				// go to Start_Experiment
+		P1OUT |= BIT0;
+		__delay_cycles(16000000);
+		P1OUT &= ~BIT0;
 	default:
 		break;
 	}
+}
+
+// Timer_B0 Interrupt Vector (TBIV) handler for LED timer
+#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
+#pragma vector=TIMERB1_VECTOR
+__interrupt void TIMERB1_ISR(void)
+#elif defined(__GNUC__)
+void __attribute__ ((interrupt(TIMERB1_VECTOR))) TIMERB1_ISR (void)
+#else
+#error Compiler not supported!
+#endif
+{
+	P1DIR |= BIT1;
+  /* Any access, read or write, of the TBIV register automatically resets the
+  highest "pending" interrupt flag. */
+  switch( __even_in_range(TBIV,14) ) {
+    case  0: break;                          // No interrupt
+    case  2:
+    	TB0CTL = MC_0;						// pause B0 timer
+    	P1OUT |= BIT0;
+    	break;                          // CCR1 not used
+    case  4: break;                          // CCR2 not used
+    case  6: break;                          // CCR3 not used
+    case  8: break;                          // CCR4 not used
+    case 10: break;                          // CCR5 not used
+    case 12: break;                          // CCR6 not used
+    case 14: P1OUT ^= 0x01;                  // overflow
+            break;
+    default: break;
+  }
 }
