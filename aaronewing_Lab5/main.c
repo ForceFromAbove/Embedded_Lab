@@ -4,6 +4,8 @@
 
 #include "Initialize.h"
 #include "Timers.h"
+#include "Time_Conversion.h"
+#include "UART.h"
 
 bool joystick_Flag = 0;
 bool switch_Flag = 0;
@@ -13,6 +15,7 @@ bool TimerB0_Flag = 0;
 
 uint16_t random_Time = 0;
 uint16_t reaction_Time = 0;
+uint16_t milliseconds = 0;
 
 enum Timer_States { random_Timer, LED_Timer, reaction_Timer } Timer_State;
 void TickFct_Timer() {
@@ -72,7 +75,7 @@ void TickFct_Latch() {
 			 break;
 
 		case reaction:
-			if (TimerB0_Flag) {						// if 3rd timer tripped
+			if (TimerA1_Flag) {						// if 3rd timer tripped
 				LA_State = UART_Transmission;
 			} else {
 				// stay
@@ -96,6 +99,7 @@ void TickFct_Latch() {
 			break;
 
 		case UART_Transmission:
+
 			write_Uart(reaction_Time, 0);		// send reaction time through UART
 			break;
 		} // State actions
@@ -154,25 +158,11 @@ __interrupt void TIMERA0_ISR(void) {
 
 
 // Timer A1 interrupt service routine for random timer
-#pragma vector=TIMER0_A1_VECTOR
+#pragma vector=TIMER1_A0_VECTOR
 __interrupt void TIMERA1_ISR(void) {
-
 	TA1CTL = MC_0;						// pause A1 timer
 	reaction_Time = TA1R;				// capture the reaction time
-
-	switch (__even_in_range(TA1IV, 14)) {
-
-	case 0:	 break;                          // No interrupt
-	case 2:	 break;                          // CCR1 not used
-	case 4:	 break;                          // CCR2 not used
-	case 6:	 break;                          // reserved
-	case 8:	 break;                          // reserved
-	case 10: break;                          // reserved
-	case 12: break;                          // reserved
-	case 14:
-		P1OUT ^= 0x01;               		 // overflow
-		break;
-	default:
-		break;
-	}
+	TimerA1_Flag = 1;					// timer A1 is done
+	milliseconds = Time_Conversion(reaction_Time);		// module to convert raw clock cycles into milliseconds.
+//	milliseconds =
 }
