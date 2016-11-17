@@ -115,7 +115,7 @@ int main(void) {
     initialize_Switches();		// initialize switches
     initialize_UART(0,0);		// initialize UART connection (for PC output)
     initialize_Interrupts();	// sets up and enables all interrupts
-//    initialize_TimerA1();		// initialize timer for A1
+    initialize_TimerA0();		// initialize timer for A1
 
     while (1) {					// run state machine
     	TickFct_Timer();
@@ -124,15 +124,8 @@ int main(void) {
 }
 
 // Port 2 interrupt service routine for Switch 1/joystick
-#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
 #pragma vector=PORT2_VECTOR
-__interrupt void Port_2(void)
-#elif defined(__GNUC__)
-void __attribute__ ((interrupt(PORT1_VECTOR))) Port_1 (void)
-#else
-#error Compiler not supported!
-#endif
-{
+__interrupt void Port_2(void) {
 	switch (__even_in_range(P2IV, 14)) {
 	case 4:										// P2.1
 	case 6:										// P2.2
@@ -149,24 +142,14 @@ void __attribute__ ((interrupt(PORT1_VECTOR))) Port_1 (void)
 }
 
 // Timer_B0 Interrupt Vector (TBIV) handler for LED timer
-#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
-#pragma vector=TIMERB1_VECTOR
-__interrupt void TIMERB1_ISR(void)
-#elif defined(__GNUC__)
-void __attribute__ ((interrupt(TIMERB1_VECTOR))) TIMERB1_ISR (void)
-#else
-#error Compiler not supported!
-#endif
-{
-	P1OUT |= BIT0;
-	__delay_cycles(16000000);
-	P1OUT &= ~BIT0;
+#pragma vector=TIMER0_B0_VECTOR
+__interrupt void TIMERB0_ISR(void) {
   /* Any access, read or write, of the TBIV register automatically resets the
   highest "pending" interrupt flag. */
   switch( __even_in_range(TBIV,14) ) {
     case  0: break;                          // No interrupt
     case  2:
-    	TB0CTL = MC_0;						// pause B0 timer
+ //   	TB0CTL = MC_0;						// pause B0 timer
     	break;                          // CCR1 not used
     case  4: break;                          // CCR2 not used
     case  6: break;                          // CCR3 not used
@@ -179,15 +162,8 @@ void __attribute__ ((interrupt(TIMERB1_VECTOR))) TIMERB1_ISR (void)
   }
 }
 
-// Timer A0 interrupt service routine
-#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
-#pragma vector=TIMER1_A0_VECTOR
-__interrupt void TIMER1_A0_ISR(void)
-#elif defined(__GNUC__)
-void __attribute__ ((interrupt(TIMER1_A0_VECTOR))) TIMER1_A0_ISR (void)
-#else
-#error Compiler not supported!
-#endif
-{
+// Timer A0 interrupt service routine for random timer
+#pragma vector=TIMER0_A0_VECTOR
+__interrupt void TIMERA0_ISR(void) {
   P1OUT ^= 0x01;                            // Toggle P1.0
 }
