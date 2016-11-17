@@ -75,12 +75,13 @@ void initialize_Joystick(void) {
 	P2DIR &= ~(LEFT | RIGHT | CENTER | UP | DOWN);	// Sets up joystick as input
 	// P2.1 - LEFT, P2.2 - RIGHT, P2.3 - CENTER, P2.4 - UP, DOWN - P2.5
 	// 0 if pushed, 1 if not.
+	P2SEL |= BIT1 | BIT2;
 	P2REN |= LEFT | RIGHT | CENTER | UP | DOWN;
 	P2OUT |= LEFT | RIGHT | CENTER | UP | DOWN;
 }
 
 void initialize_Interrupts(void) {
-	P2IE = BIT1 + BIT2 + BIT6;		// BIT1 = joystick left, BIT2 = joystick right, BIT6 = switch 1
+	P2IE |= BIT1 + BIT2 + BIT6;		// BIT1 = joystick left, BIT2 = joystick right, BIT6 = switch 1
 
 	__bis_SR_register(GIE);       // enable interrupt
 }

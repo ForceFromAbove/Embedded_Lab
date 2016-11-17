@@ -18,7 +18,7 @@ enum Timer_States { random_Timer, LED_Timer, reaction_Timer } Timer_State;
 void TickFct_Timer() {
 	switch(Timer_State) {   // Transitions
   		default:
-  		case random_Timer:  // Initial transition
+  		case random_Timer:  			// Run random timer
   			if (TimerA0_Flag) {
   				// stay
   				Timer_State = random_Timer;
@@ -28,7 +28,7 @@ void TickFct_Timer() {
   			break;
 
   		case LED_Timer:
-  			if (TimerB0_Flag) {						// if random timer goes off (B0)
+  			if (TimerB0_Flag) {								// if random timer goes off (B0)
   			Timer_State = reaction_Timer;
 			} else {
 				// stay
@@ -44,16 +44,16 @@ void TickFct_Timer() {
 	switch (Timer_State) {   // State actions
 		default:
 		case random_Timer:
-			initialize_TimerA0();		// initialize timer for A1 (continous timer for random number)
+			initialize_TimerA0();		// initialize timer for A0 (continuous timer for random number)
 			TimerA0_Flag = 0;
 			break;
 
 		case LED_Timer:
-			led_Blink(0);
+			P1OUT |= BIT0;
 			break;
 
 		case reaction_Timer:
-			led_Blink(0);
+			write_Uart(reaction_Time, 0);		// send reaction time through UART
 			break;
 	} // State actions
 	}
@@ -63,11 +63,11 @@ enum LA_States { wait_For_Start, reaction, UART_Transmission } LA_State;
 void TickFct_Latch() {
 	switch(LA_State) {   // Transitions
 		default:
-		case wait_For_Start:  // Initial transition
+		case wait_For_Start:  		// Wait for SW1
 			 if (switch_Flag) {
 				LA_State = reaction;
 			 } else {
-				 // quack
+				 // do nothing
 			 }
 			 break;
 
@@ -88,19 +88,15 @@ void TickFct_Latch() {
 	switch (LA_State) {   // State actions
 		default:
 		case wait_For_Start:
-			// run continous timer for rand number
-//			random_Time = TA0R;			// grabs random time from TA0 <might not be needed>
-			// do nothing?
+			// wait for switch
 			break;
 
 		case reaction:
-		//	led_Blink(0);
+			// wait for user reaction
 			break;
 
 		case UART_Transmission:
-			// convert time to ms
-			// transmit through UART
-			led_Blink(0);
+			write_Uart(reaction_Time, 0);		// send reaction time through UART
 			break;
 		} // State actions
 	}
@@ -127,15 +123,12 @@ int main(void) {
 #pragma vector=PORT2_VECTOR
 __interrupt void Port_2(void) {
 	switch (__even_in_range(P2IV, 14)) {
-	case 4:										// P2.1
-	case 6:										// P2.2
-		TA1CTL = MC_0;						// pause A1 timer
-		TA1R = reaction_Time;				// reaction time in clock cycles
-		break;
 	case 14:									// P2.6
 		//start timer
 		initialize_TimerB0();			// initialize timer for A2
+		TA0CTL = MC_0;					// pause random timer
 		switch_Flag = 1;				// go to Start_Experiment
+		TimerA0_Flag = 0;				// TimerA0 is off
 	default:
 		break;
 	}
@@ -144,39 +137,42 @@ __interrupt void Port_2(void) {
 // Timer_B0 Interrupt Vector (TBIV) handler for LED timer
 #pragma vector=TIMER0_B0_VECTOR
 __interrupt void TIMERB0_ISR(void) {
-  /* Any access, read or write, of the TBIV register automatically resets the
-  highest "pending" interrupt flag. */
-/*  switch( __even_in_range(TBIV,14) ) {
-    case  0: break;                          // No interrupt
-    case  2:
- //   	TB0CTL = MC_0;						// pause B0 timer
-    	break;                          // CCR1 not used
-    case  4: break;                          // CCR2 not used
-    case  6: break;                          // CCR3 not used
-    case  8: break;                          // CCR4 not used
-    case 10: break;                          // CCR5 not used
-    case 12: break;                          // CCR6 not used
-    case 14: P1OUT ^= 0x01;                  // overflow
-            break;
-    default: break;
-  } */
 
-	P1OUT |= BIT1;					// turn on LED1
-// enable joystick interrupt
-// start A1 timer
-	initialize_TimerA1();
-
-
+	TA0CTL = MC_0;					// pause A0 timer
+	TB0CTL = MC_0;					// pause B0 timer
+	P1OUT &= ~BIT1;					// turn off LED2
+	P1OUT |= BIT0;					// turn on LED1
+	initialize_TimerA1();			// start capture timer
 }
 
-// Timer A0 interrupt service routine for random timer
+// Timer A0 interrupt
+// service routine for random timer
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void TIMERA0_ISR(void) {
   P1OUT ^= 0x02;                            // Toggle LED2
 }
 
+
 // Timer A1 interrupt service routine for random timer
 #pragma vector=TIMER0_A1_VECTOR
 __interrupt void TIMERA1_ISR(void) {
-  P1OUT ^= 0x02;                            // Toggle LED2
+
+	TA1CTL = MC_0;						// pause A1 timer
+	reaction_Time = TA1R;				// capture the reaction time
+
+	switch (__even_in_range(TA1IV, 14)) {
+
+	case 0:	 break;                          // No interrupt
+	case 2:	 break;                          // CCR1 not used
+	case 4:	 break;                          // CCR2 not used
+	case 6:	 break;                          // reserved
+	case 8:	 break;                          // reserved
+	case 10: break;                          // reserved
+	case 12: break;                          // reserved
+	case 14:
+		P1OUT ^= 0x01;               		 // overflow
+		break;
+	default:
+		break;
+	}
 }
