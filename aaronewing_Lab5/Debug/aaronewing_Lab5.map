@@ -1,10 +1,10 @@
 ******************************************************************************
                   MSP430 Linker PC v15.12.3                    
 ******************************************************************************
->> Linked Thu Nov 17 09:07:37 2016
+>> Linked Mon Nov 21 17:04:12 2016
 
 OUTPUT FILE NAME:   <aaronewing_Lab5.out>
-ENTRY POINT SYMBOL: "_c_int00_noargs_noexit"  address: 00005c58
+ENTRY POINT SYMBOL: "_c_int00_noargs_noexit"  address: 00005c80
 
 
 MEMORY CONFIGURATION
@@ -18,8 +18,8 @@ MEMORY CONFIGURATION
   INFOC                 00001880   00000080  00000000  00000080  RWIX
   INFOB                 00001900   00000080  00000000  00000080  RWIX
   INFOA                 00001980   00000080  00000000  00000080  RWIX
-  RAM                   00001c00   00004000  000000b0  00003f50  RWIX
-  FLASH                 00005c00   0000a380  000000ae  0000a2d2  RWIX
+  RAM                   00001c00   00004000  000000b6  00003f4a  RWIX
+  FLASH                 00005c00   0000a380  000000d6  0000a2aa  RWIX
   INT00                 0000ff80   00000002  00000000  00000002  RWIX
   INT01                 0000ff82   00000002  00000000  00000002  RWIX
   INT02                 0000ff84   00000002  00000000  00000002  RWIX
@@ -84,7 +84,7 @@ MEMORY CONFIGURATION
   INT61                 0000fffa   00000002  00000002  00000000  RWIX
   INT62                 0000fffc   00000002  00000002  00000000  RWIX
   RESET                 0000fffe   00000002  00000002  00000000  RWIX
-  FLASH2                00010000   00035c00  00000400  00035800  RWIX
+  FLASH2                00010000   00035c00  00000464  0003579c  RWIX
 
 
 SECTION ALLOCATION MAP
@@ -92,32 +92,32 @@ SECTION ALLOCATION MAP
  output                                  attributes/
 section   page    origin      length       input sections
 --------  ----  ----------  ----------   ----------------
-.data      0    00001c00    0000000c     UNINITIALIZED
-                  00001c00    0000000c     main.obj (.data)
+.data      0    00001c00    00000012     UNINITIALIZED
+                  00001c00    00000012     main.obj (.data)
 
-.bss       0    00001c0c    00000004     UNINITIALIZED
-                  00001c0c    00000002     (.common:LA_State)
-                  00001c0e    00000002     (.common:Timer_State)
+.bss       0    00001c12    00000004     UNINITIALIZED
+                  00001c12    00000002     (.common:LA_State)
+                  00001c14    00000002     (.common:Timer_State)
 
 .stack     0    00005b60    000000a0     UNINITIALIZED
                   00005b60    00000004     rts430x_lc_rd_eabi.lib : boot.obj (.stack)
                   00005b64    0000009c     --HOLE--
 
 .text:_isr 
-*          0    00005c00    00000080     
-                  00005c00    00000020     main.obj (.text:_isr:TIMERA1_ISR)
-                  00005c20    0000001e     main.obj (.text:_isr:Port_2)
-                  00005c3e    0000001a     main.obj (.text:_isr:TIMERB0_ISR)
-                  00005c58    0000001a     rts430x_lc_rd_eabi.lib : boot_special.obj (.text:_isr:_c_int00_noargs_noexit)
-                  00005c72    00000008                            : isr_trap.obj (.text:_isr:__TI_ISR_TRAP)
-                  00005c7a    00000006     main.obj (.text:_isr:TIMERA0_ISR)
+*          0    00005c00    000000a8     
+                  00005c00    00000048     main.obj (.text:_isr:TIMERA1_ISR)
+                  00005c48    0000001e     main.obj (.text:_isr:Port_2)
+                  00005c66    0000001a     main.obj (.text:_isr:TIMERB0_ISR)
+                  00005c80    0000001a     rts430x_lc_rd_eabi.lib : boot_special.obj (.text:_isr:_c_int00_noargs_noexit)
+                  00005c9a    00000008                            : isr_trap.obj (.text:_isr:__TI_ISR_TRAP)
+                  00005ca2    00000006     main.obj (.text:_isr:TIMERA0_ISR)
 
-.cinit     0    00005c80    0000002e     
-                  00005c80    0000000c     (.cinit..data.load) [load image, compression = rle]
-                  00005c8c    00000009     (.cinit..bss.load) [load image, compression = rle]
-                  00005c95    00000001     --HOLE-- [fill = 0]
-                  00005c96    00000008     (__TI_handler_table)
-                  00005c9e    00000010     (__TI_cinit_table)
+.cinit     0    00005ca8    0000002e     
+                  00005ca8    0000000c     (.cinit..data.load) [load image, compression = rle]
+                  00005cb4    00000009     (.cinit..bss.load) [load image, compression = rle]
+                  00005cbd    00000001     --HOLE-- [fill = 0]
+                  00005cbe    00000008     (__TI_handler_table)
+                  00005cc6    00000010     (__TI_cinit_table)
 
 .init_array 
 *          0    00005c00    00000000     UNINITIALIZED
@@ -197,48 +197,50 @@ SYSNMI     0    0000fffc    00000002
 .reset     0    0000fffe    00000002     
                   0000fffe    00000002     rts430x_lc_rd_eabi.lib : boot.obj (.reset)
 
-.text      0    00010000    00000400     
+.text      0    00010000    00000464     
                   00010000    00000116     UART.obj (.text:initialize_UART)
                   00010116    00000082     rts430x_lc_rd_eabi.lib : autoinit_wdt.obj (.text:_auto_init_hold_wdt)
                   00010198    00000068                            : copy_decompress_rle.obj (.text:__TI_decompress_rle_core)
                   00010200    00000066                            : cpy_tbl.obj (.text:copy_in)
                   00010266    00000044     Initialize.obj (.text:initialize_Clocks)
-                  000102aa    00000032     main.obj (.text:main)
-                  000102dc    0000002c     main.obj (.text:TickFct_Timer)
-                  00010308    0000002a     main.obj (.text:TickFct_Latch)
-                  00010332    0000001a     Timers.obj (.text:initialize_TimerB0)
-                  0001034c    00000018     Initialize.obj (.text:initialize_Joystick)
-                  00010364    00000018     rts430x_lc_rd_eabi.lib : mult16_f5hw.obj (.text)
-                  0001037c    00000014                            : memcpy.obj (.text:memcpy)
-                  00010390    00000012                            : copy_decompress_none.obj (.text:decompress:none:__TI_decompress_none)
-                  000103a2    00000012     Timers.obj (.text:initialize_TimerA0)
-                  000103b4    00000012     Timers.obj (.text:initialize_TimerA1)
-                  000103c6    0000000e     Initialize.obj (.text:initialize_Interrupts)
-                  000103d4    0000000e     Initialize.obj (.text:initialize_LED)
-                  000103e2    00000008     Initialize.obj (.text:initialize_Switches)
-                  000103ea    00000006     rts430x_lc_rd_eabi.lib : exit.obj (.text:abort)
-                  000103f0    00000006                            : copy_decompress_rle.obj (.text:decompress:rle24:__TI_decompress_rle24)
-                  000103f6    00000004     Time_Conversion.obj (.text:Time_Conversion)
-                  000103fa    00000004     rts430x_lc_rd_eabi.lib : pre_init.obj (.text:_system_pre_init)
-                  000103fe    00000002                            : startup.obj (.text:_system_post_cinit)
+                  000102aa    0000003e     rts430x_lc_rd_eabi.lib : lsr32.obj (.text:l_lsr_const)
+                  000102e8    00000032     main.obj (.text:main)
+                  0001031a    00000030     main.obj (.text:TickFct_Latch)
+                  0001034a    0000002c     main.obj (.text:TickFct_Timer)
+                  00010376    00000024     rts430x_lc_rd_eabi.lib : mult32_f5hw.obj (.text)
+                  0001039a    0000001a     Timers.obj (.text:initialize_TimerB0)
+                  000103b4    00000018     Initialize.obj (.text:initialize_Joystick)
+                  000103cc    00000018     rts430x_lc_rd_eabi.lib : mult16_f5hw.obj (.text)
+                  000103e4    00000014                            : memcpy.obj (.text:memcpy)
+                  000103f8    00000012                            : copy_decompress_none.obj (.text:decompress:none:__TI_decompress_none)
+                  0001040a    00000012     Timers.obj (.text:initialize_TimerA0)
+                  0001041c    00000012     Timers.obj (.text:initialize_TimerA1)
+                  0001042e    0000000e     Initialize.obj (.text:initialize_Interrupts)
+                  0001043c    0000000e     Initialize.obj (.text:initialize_LED)
+                  0001044a    00000008     Initialize.obj (.text:initialize_Switches)
+                  00010452    00000006     rts430x_lc_rd_eabi.lib : exit.obj (.text:abort)
+                  00010458    00000006                            : copy_decompress_rle.obj (.text:decompress:rle24:__TI_decompress_rle24)
+                  0001045e    00000004                            : pre_init.obj (.text:_system_pre_init)
+                  00010462    00000002                            : startup.obj (.text:_system_post_cinit)
 
 MODULE SUMMARY
 
        Module                     code   ro data   rw data
        ------                     ----   -------   -------
     .\
+       main.obj                   276    8         22     
        UART.obj                   278    0         0      
-       main.obj                   230    8         16     
        Initialize.obj             128    0         0      
        Timers.obj                 62     0         0      
-       Time_Conversion.obj        4      0         0      
     +--+--------------------------+------+---------+---------+
-       Total:                     702    8         16     
+       Total:                     744    8         22     
                                                           
     C:\ti\ccsv6\tools\compiler\msp430_15.12.3.LTS\lib\rts430x_lc_rd_eabi.lib
        autoinit_wdt.obj           130    0         0      
        copy_decompress_rle.obj    110    0         0      
        cpy_tbl.obj                102    0         0      
+       lsr32.obj                  62     0         0      
+       mult32_f5hw.obj            36     0         0      
        boot_special.obj           26     0         0      
        mult16_f5hw.obj            24     0         0      
        memcpy.obj                 20     0         0      
@@ -267,24 +269,24 @@ MODULE SUMMARY
        int62.obj                  0      2         0      
        startup.obj                2      0         0      
     +--+--------------------------+------+---------+---------+
-       Total:                     450    38        0      
+       Total:                     548    38        0      
                                                           
        Stack:                     0      0         160    
        Linker Generated:          0      45        0      
     +--+--------------------------+------+---------+---------+
-       Grand Total:               1152   91        176    
+       Grand Total:               1292   91        182    
 
 
 LINKER GENERATED COPY TABLES
 
-__TI_cinit_table @ 00005c9e records: 2, size/record: 8, table size: 16
-	.data: load addr=00005c80, load size=0000000c bytes, run addr=00001c00, run size=0000000c bytes, compression=rle
-	.bss: load addr=00005c8c, load size=00000009 bytes, run addr=00001c0c, run size=00000004 bytes, compression=rle
+__TI_cinit_table @ 00005cc6 records: 2, size/record: 8, table size: 16
+	.data: load addr=00005ca8, load size=0000000c bytes, run addr=00001c00, run size=00000012 bytes, compression=rle
+	.bss: load addr=00005cb4, load size=00000009 bytes, run addr=00001c12, run size=00000004 bytes, compression=rle
 
 
 LINKER GENERATED HANDLER TABLE
 
-__TI_handler_table @ 00005c96 records: 2, size/record: 4, table size: 8
+__TI_handler_table @ 00005cbe records: 2, size/record: 4, table size: 8
 	index: 0, handler: __TI_decompress_rle24
 	index: 1, handler: __TI_decompress_none
 
@@ -375,7 +377,7 @@ address   name
 00000732  ADC12MEM9               
 00000733  ADC12MEM9_H             
 00000732  ADC12MEM9_L             
-000103ea  C$$EXIT                 
+00010452  C$$EXIT                 
 00000150  CRCDI                   
 00000152  CRCDIRB                 
 00000153  CRCDIRB_H               
@@ -445,7 +447,7 @@ address   name
 00000146  FCTL4                   
 00000147  FCTL4_H                 
 00000146  FCTL4_L                 
-00001c0c  LA_State                
+00001c12  LA_State                
 000004c4  MAC                     
 000004da  MAC32H                  
 000004db  MAC32H_H                
@@ -643,7 +645,7 @@ address   name
 0000012e  PMMRIE                  
 0000012f  PMMRIE_H                
 0000012e  PMMRIE_L                
-00005c20  Port_2                  
+00005c48  Port_2                  
 00000158  RCCTL0                  
 00000159  RCCTL0_H                
 00000158  RCCTL0_L                
@@ -798,16 +800,16 @@ address   name
 000003e0  TB0EX0                  
 000003ee  TB0IV                   
 000003d0  TB0R                    
-00005c7a  TIMERA0_ISR             
+00005ca2  TIMERA0_ISR             
 00005c00  TIMERA1_ISR             
-00005c3e  TIMERB0_ISR             
-00010308  TickFct_Latch           
-000102dc  TickFct_Timer           
-000103f6  Time_Conversion         
+00005c66  TIMERB0_ISR             
+0001031a  TickFct_Latch           
+0001034a  TickFct_Timer           
 00001c02  TimerA0_Flag            
 00001c03  TimerA1_Flag            
 00001c04  TimerB0_Flag            
-00001c0e  Timer_State             
+00001c14  Timer_State             
+00001c05  UART_Flag               
 000005d0  UCA0ABCTL               
 000005c6  UCA0BRW                 
 000005c7  UCA0BRW_H               
@@ -990,15 +992,15 @@ address   name
 000000a0  __STACK_SIZE            
 UNDEFED   __TI_BINIT_Base         
 UNDEFED   __TI_BINIT_Limit        
-00005c9e  __TI_CINIT_Base         
-00005cae  __TI_CINIT_Limit        
-00005c96  __TI_Handler_Table_Base 
-00005c9e  __TI_Handler_Table_Limit
+00005cc6  __TI_CINIT_Base         
+00005cd6  __TI_CINIT_Limit        
+00005cbe  __TI_Handler_Table_Base 
+00005cc6  __TI_Handler_Table_Limit
 UNDEFED   __TI_INITARRAY_Base     
 UNDEFED   __TI_INITARRAY_Limit    
-00005c72  __TI_ISR_TRAP           
-00010390  __TI_decompress_none    
-000103f0  __TI_decompress_rle24   
+00005c9a  __TI_ISR_TRAP           
+000103f8  __TI_decompress_none    
+00010458  __TI_decompress_rle24   
 0000ffd2  __TI_int41              
 0000ffd4  __TI_int42              
 0000ffd6  __TI_int43              
@@ -1025,30 +1027,47 @@ ffffffff  __TI_pprof_out_hndl
 ffffffff  __TI_prof_data_size     
 ffffffff  __TI_prof_data_start    
 ffffffff  __c_args__              
-00010364  __mspabi_mpyi_f5hw      
+000103cc  __mspabi_mpyi_f5hw      
+00010376  __mspabi_mpyl_f5hw      
+000102e2  __mspabi_srll_1         
+000102be  __mspabi_srll_10        
+000102ba  __mspabi_srll_11        
+000102b6  __mspabi_srll_12        
+000102b2  __mspabi_srll_13        
+000102ae  __mspabi_srll_14        
+000102aa  __mspabi_srll_15        
+000102de  __mspabi_srll_2         
+000102da  __mspabi_srll_3         
+000102d6  __mspabi_srll_4         
+000102d2  __mspabi_srll_5         
+000102ce  __mspabi_srll_6         
+000102ca  __mspabi_srll_7         
+000102c6  __mspabi_srll_8         
+000102c2  __mspabi_srll_9         
 00010116  _auto_init_hold_wdt     
-00005c58  _c_int00_noargs_noexit  
+00005c80  _c_int00_noargs_noexit  
 0000fffe  _reset_vector           
 00005b60  _stack                  
-000103fe  _system_post_cinit      
-000103fa  _system_pre_init        
-000103ea  abort                   
+00010462  _system_post_cinit      
+0001045e  _system_pre_init        
+00010452  abort                   
 00010200  copy_in                 
 00010266  initialize_Clocks       
-000103c6  initialize_Interrupts   
-0001034c  initialize_Joystick     
-000103d4  initialize_LED          
-000103e2  initialize_Switches     
-000103a2  initialize_TimerA0      
-000103b4  initialize_TimerA1      
-00010332  initialize_TimerB0      
+0001042e  initialize_Interrupts   
+000103b4  initialize_Joystick     
+0001043c  initialize_LED          
+0001044a  initialize_Switches     
+0001040a  initialize_TimerA0      
+0001041c  initialize_TimerA1      
+0001039a  initialize_TimerB0      
 00010000  initialize_UART         
 00001c00  joystick_Flag           
-000102aa  main                    
-0001037c  memcpy                  
-00001c0a  milliseconds            
+000102e8  main                    
+000103e4  memcpy                  
+00001c10  milliseconds            
 00001c06  random_Time             
 00001c08  reaction_Time           
+00001c0c  reaction_Time2          
 00001c01  switch_Flag             
 
 
@@ -1742,23 +1761,25 @@ address   name
 00001c02  TimerA0_Flag            
 00001c03  TimerA1_Flag            
 00001c04  TimerB0_Flag            
+00001c05  UART_Flag               
 00001c06  random_Time             
 00001c08  reaction_Time           
-00001c0a  milliseconds            
-00001c0c  LA_State                
-00001c0e  Timer_State             
+00001c0c  reaction_Time2          
+00001c10  milliseconds            
+00001c12  LA_State                
+00001c14  Timer_State             
 00005b60  _stack                  
 00005c00  TIMERA1_ISR             
 00005c00  __STACK_END             
-00005c20  Port_2                  
-00005c3e  TIMERB0_ISR             
-00005c58  _c_int00_noargs_noexit  
-00005c72  __TI_ISR_TRAP           
-00005c7a  TIMERA0_ISR             
-00005c96  __TI_Handler_Table_Base 
-00005c9e  __TI_CINIT_Base         
-00005c9e  __TI_Handler_Table_Limit
-00005cae  __TI_CINIT_Limit        
+00005c48  Port_2                  
+00005c66  TIMERB0_ISR             
+00005c80  _c_int00_noargs_noexit  
+00005c9a  __TI_ISR_TRAP           
+00005ca2  TIMERA0_ISR             
+00005cbe  __TI_Handler_Table_Base 
+00005cc6  __TI_CINIT_Base         
+00005cc6  __TI_Handler_Table_Limit
+00005cd6  __TI_CINIT_Limit        
 0000ffd2  __TI_int41              
 0000ffd4  __TI_int42              
 0000ffd6  __TI_int43              
@@ -1786,25 +1807,40 @@ address   name
 00010116  _auto_init_hold_wdt     
 00010200  copy_in                 
 00010266  initialize_Clocks       
-000102aa  main                    
-000102dc  TickFct_Timer           
-00010308  TickFct_Latch           
-00010332  initialize_TimerB0      
-0001034c  initialize_Joystick     
-00010364  __mspabi_mpyi_f5hw      
-0001037c  memcpy                  
-00010390  __TI_decompress_none    
-000103a2  initialize_TimerA0      
-000103b4  initialize_TimerA1      
-000103c6  initialize_Interrupts   
-000103d4  initialize_LED          
-000103e2  initialize_Switches     
-000103ea  C$$EXIT                 
-000103ea  abort                   
-000103f0  __TI_decompress_rle24   
-000103f6  Time_Conversion         
-000103fa  _system_pre_init        
-000103fe  _system_post_cinit      
+000102aa  __mspabi_srll_15        
+000102ae  __mspabi_srll_14        
+000102b2  __mspabi_srll_13        
+000102b6  __mspabi_srll_12        
+000102ba  __mspabi_srll_11        
+000102be  __mspabi_srll_10        
+000102c2  __mspabi_srll_9         
+000102c6  __mspabi_srll_8         
+000102ca  __mspabi_srll_7         
+000102ce  __mspabi_srll_6         
+000102d2  __mspabi_srll_5         
+000102d6  __mspabi_srll_4         
+000102da  __mspabi_srll_3         
+000102de  __mspabi_srll_2         
+000102e2  __mspabi_srll_1         
+000102e8  main                    
+0001031a  TickFct_Latch           
+0001034a  TickFct_Timer           
+00010376  __mspabi_mpyl_f5hw      
+0001039a  initialize_TimerB0      
+000103b4  initialize_Joystick     
+000103cc  __mspabi_mpyi_f5hw      
+000103e4  memcpy                  
+000103f8  __TI_decompress_none    
+0001040a  initialize_TimerA0      
+0001041c  initialize_TimerA1      
+0001042e  initialize_Interrupts   
+0001043c  initialize_LED          
+0001044a  initialize_Switches     
+00010452  C$$EXIT                 
+00010452  abort                   
+00010458  __TI_decompress_rle24   
+0001045e  _system_pre_init        
+00010462  _system_post_cinit      
 ffffffff  __TI_pprof_out_hndl     
 ffffffff  __TI_prof_data_size     
 ffffffff  __TI_prof_data_start    
@@ -1814,4 +1850,4 @@ UNDEFED   __TI_BINIT_Limit
 UNDEFED   __TI_INITARRAY_Base     
 UNDEFED   __TI_INITARRAY_Limit    
 
-[757 symbols]
+[774 symbols]

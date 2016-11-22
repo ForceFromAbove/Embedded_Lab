@@ -12,9 +12,11 @@ bool switch_Flag = 0;
 bool TimerA0_Flag = 1;
 bool TimerA1_Flag = 0;
 bool TimerB0_Flag = 0;
+bool UART_Flag = 0;
 
 uint16_t random_Time = 0;
-uint16_t reaction_Time = 0;
+uint32_t reaction_Time = 0;
+uint32_t reaction_Time2 = 0;
 uint16_t milliseconds = 0;
 
 enum Timer_States { random_Timer, LED_Timer, reaction_Timer } Timer_State;
@@ -83,8 +85,12 @@ void TickFct_Latch() {
 			break;
 
 		case UART_Transmission:
+			if (!TimerA1_Flag) {
 			// do nothing go to interrupt 					when done with UART
-			LA_State = wait_For_Start;
+				LA_State = wait_For_Start;
+			} else {
+				// stay
+			}
 			break;
 
 
@@ -101,6 +107,7 @@ void TickFct_Latch() {
 		case UART_Transmission:
 
 			write_Uart(reaction_Time, 0);		// send reaction time through UART
+			TimerA1_Flag = 0;					// restart reaction timer
 			break;
 		} // State actions
 	}
@@ -160,9 +167,11 @@ __interrupt void TIMERA0_ISR(void) {
 // Timer A1 interrupt service routine for random timer
 #pragma vector=TIMER1_A0_VECTOR
 __interrupt void TIMERA1_ISR(void) {
-	TA1CTL = MC_0;						// pause A1 timer
-	reaction_Time = TA1R;				// capture the reaction time
-	TimerA1_Flag = 1;					// timer A1 is done
-	milliseconds = Time_Conversion(reaction_Time);		// module to convert raw clock cycles into milliseconds.
-//	milliseconds =
+	TA1CTL = MC_0;							// pause A1 timer
+	reaction_Time = TA1R;					// capture the reaction time
+	TimerA1_Flag = 1;						// timer A1 is done
+	P1OUT &= ~BIT0;							// turn off LED1
+	reaction_Time2 = (reaction_Time*1000);
+	reaction_Time = reaction_Time2/32768;	// reaction time in seconds
+	UART_Flag = 1;							// go to UART section
 }
