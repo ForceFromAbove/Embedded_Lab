@@ -10,7 +10,6 @@ main.obj: C:/ti/ccsv6/tools/compiler/msp430_15.12.3.LTS/include/stdbool.h
 main.obj: C:/ti/ccsv6/tools/compiler/msp430_15.12.3.LTS/include/stdint.h
 main.obj: ../Initialize.h
 main.obj: ../Timers.h
-main.obj: ../Time_Conversion.h
 main.obj: ../UART.h
 
 ../main.c: 
@@ -23,5 +22,4 @@ C:/ti/ccsv6/tools/compiler/msp430_15.12.3.LTS/include/stdbool.h:
 C:/ti/ccsv6/tools/compiler/msp430_15.12.3.LTS/include/stdint.h: 
 ../Initialize.h: 
 ../Timers.h: 
-../Time_Conversion.h: 
 ../UART.h: 

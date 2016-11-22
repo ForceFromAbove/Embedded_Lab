@@ -4,7 +4,6 @@
 
 #include "Initialize.h"
 #include "Timers.h"
-#include "Time_Conversion.h"
 #include "UART.h"
 
 bool joystick_Flag = 0;
@@ -22,7 +21,6 @@ uint16_t milliseconds = 0;
 enum Timer_States { random_Timer, LED_Timer, reaction_Timer } Timer_State;
 void TickFct_Timer() {
 	switch(Timer_State) {   // Transitions
-  		default:
   		case random_Timer:  			// Run random timer
   			if (TimerA0_Flag) {
   				// stay
@@ -45,12 +43,13 @@ void TickFct_Timer() {
 			Timer_State = random_Timer;
 			break;
 
-
-	switch (Timer_State) {   // State actions
 		default:
+			break;
+	}
+
+/*	switch (Timer_State) {   // State actions
 		case random_Timer:
-			initialize_TimerA0();		// initialize timer for A0 (continuous timer for random number)
-			TimerA0_Flag = 0;
+			// do nothing
 			break;
 
 		case LED_Timer:
@@ -58,10 +57,12 @@ void TickFct_Timer() {
 			break;
 
 		case reaction_Timer:
-			write_Uart(reaction_Time, 0);		// send reaction time through UART
+			write_UART(reaction_Time, 0);		// send reaction time through UART
 			break;
-	} // State actions
-	}
+
+		default:
+			break;
+	} // State actions */
 }
 
 enum LA_States { wait_For_Start, reaction, UART_Transmission } LA_State;
@@ -92,9 +93,9 @@ void TickFct_Latch() {
 				// stay
 			}
 			break;
+	}
 
-
-	switch (LA_State) {   // State actions
+/*	switch (LA_State) {   // State actions
 		default:
 		case wait_For_Start:
 			// wait for switch
@@ -105,12 +106,10 @@ void TickFct_Latch() {
 			break;
 
 		case UART_Transmission:
-
-			write_Uart(reaction_Time, 0);		// send reaction time through UART
+			write_UART(reaction_Time, 0);		// send reaction time through UART
 			TimerA1_Flag = 0;					// restart reaction timer
 			break;
-		} // State actions
-	}
+	} // State actions */
 }
 
 int main(void) {
@@ -174,4 +173,5 @@ __interrupt void TIMERA1_ISR(void) {
 	reaction_Time2 = (reaction_Time*1000);
 	reaction_Time = reaction_Time2/32768;	// reaction time in seconds
 	UART_Flag = 1;							// go to UART section
+	write_UART(reaction_Time, 0);			// send reaction time through UART
 }
