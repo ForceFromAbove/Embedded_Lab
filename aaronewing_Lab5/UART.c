@@ -29,9 +29,13 @@ void initialize_UART(bool baud_Rate, uint8_t pin_Setting) {
 			// Configure Timer for 9600 Baud
 			UCA0CTL1 = UCSSEL__ACLK;              // Set ACLK = 32768 as UCBRCLK
 			UCA0BR0 = 3;                              // 9600 baud
-			UCA0MCTL |= 0x5300;            // 32768/9600 - INT(32768/9600)=0.41
+	//		UCA0MCTL |= 0x5300;            // 32768/9600 - INT(32768/9600)=0.41
 											// UCBRSx value = 0x53 (See UG)
-			UCA0BR1 = 0;
+	//		UCA0BR1 = 0;
+
+			UCA0BR1 = 0x00;
+			UCA0MCTL = UCBRS_3 + UCBRF_0;	// Modulation UCBRSx=3, UCBRFx=0
+
 			break;
 
 		default:
