@@ -1,7 +1,7 @@
 ******************************************************************************
-                  MSP430 Linker PC v15.12.1                    
+                  MSP430 Linker PC v15.12.3                    
 ******************************************************************************
->> Linked Thu Sep 08 09:08:46 2016
+>> Linked Fri Nov 25 16:14:55 2016
 
 OUTPUT FILE NAME:   <aaronewing_Lab1.out>
 ENTRY POINT SYMBOL: "_c_int00_noargs_noexit"  address: 00005c00
@@ -18,8 +18,8 @@ MEMORY CONFIGURATION
   INFOC                 00001880   00000080  00000000  00000080  RWIX
   INFOB                 00001900   00000080  00000000  00000080  RWIX
   INFOA                 00001980   00000080  00000000  00000080  RWIX
-  RAM                   00001c00   00004000  000000a0  00003f60  RWIX
-  FLASH                 00005c00   0000a380  00000022  0000a35e  RWIX
+  RAM                   00001c00   00004000  000000a1  00003f5f  RWIX
+  FLASH                 00005c00   0000a380  0000003a  0000a346  RWIX
   INT00                 0000ff80   00000002  00000000  00000002  RWIX
   INT01                 0000ff82   00000002  00000000  00000002  RWIX
   INT02                 0000ff84   00000002  00000000  00000002  RWIX
@@ -84,7 +84,7 @@ MEMORY CONFIGURATION
   INT61                 0000fffa   00000002  00000002  00000000  RWIX
   INT62                 0000fffc   00000002  00000002  00000000  RWIX
   RESET                 0000fffe   00000002  00000002  00000000  RWIX
-  FLASH2                00010000   00035c00  00000232  000359ce  RWIX
+  FLASH2                00010000   00035c00  00000432  000357ce  RWIX
 
 
 SECTION ALLOCATION MAP
@@ -92,6 +92,9 @@ SECTION ALLOCATION MAP
  output                                  attributes/
 section   page    origin      length       input sections
 --------  ----  ----------  ----------   ----------------
+.data      0    00001c00    00000001     UNINITIALIZED
+                  00001c00    00000001     main.obj (.data)
+
 .stack     0    00005b60    000000a0     UNINITIALIZED
                   00005b60    00000004     rts430x_lc_rd_eabi.lib : boot.obj (.stack)
                   00005b64    0000009c     --HOLE--
@@ -101,7 +104,11 @@ section   page    origin      length       input sections
                   00005c00    0000001a     rts430x_lc_rd_eabi.lib : boot_special.obj (.text:_isr:_c_int00_noargs_noexit)
                   00005c1a    00000008                            : isr_trap.obj (.text:_isr:__TI_ISR_TRAP)
 
-.cinit     0    00005c00    00000000     UNINITIALIZED
+.cinit     0    00005c22    00000018     
+                  00005c22    00000008     (__TI_handler_table)
+                  00005c2a    00000007     (.cinit..data.load) [load image, compression = rle]
+                  00005c31    00000001     --HOLE-- [fill = 0]
+                  00005c32    00000008     (__TI_cinit_table)
 
 .init_array 
 *          0    00005c00    00000000     UNINITIALIZED
@@ -181,68 +188,88 @@ SYSNMI     0    0000fffc    00000002
 .reset     0    0000fffe    00000002     
                   0000fffe    00000002     rts430x_lc_rd_eabi.lib : boot.obj (.reset)
 
-.text      0    00010000    00000232     
-                  00010000    000000c0     main.obj (.text:main)
-                  000100c0    00000082     rts430x_lc_rd_eabi.lib : autoinit_wdt.obj (.text:_auto_init_hold_wdt)
-                  00010142    00000066                            : cpy_tbl.obj (.text:copy_in)
-                  000101a8    00000034     main.obj (.text:led_Blink)
-                  000101dc    00000018     rts430x_lc_rd_eabi.lib : mult16_f5hw.obj (.text)
-                  000101f4    00000014                            : memcpy.obj (.text:memcpy)
-                  00010208    0000000e     main.obj (.text:led_Init)
-                  00010216    00000008     main.obj (.text:button_Init)
-                  0001021e    00000008     main.obj (.text:joystick_Init)
-                  00010226    00000006     rts430x_lc_rd_eabi.lib : exit.obj (.text:abort)
-                  0001022c    00000004                            : pre_init.obj (.text:_system_pre_init)
-                  00010230    00000002                            : startup.obj (.text:_system_post_cinit)
+.text      0    00010000    00000432     
+                  00010000    0000021a     main.obj (.text:main)
+                  0001021a    00000082     rts430x_lc_rd_eabi.lib : autoinit_wdt.obj (.text:_auto_init_hold_wdt)
+                  0001029c    00000068                            : copy_decompress_rle.obj (.text:__TI_decompress_rle_core)
+                  00010304    00000066                            : cpy_tbl.obj (.text:copy_in)
+                  0001036a    00000030     main.obj (.text:led_Blink)
+                  0001039a    0000001e     main.obj (.text:reset_Lock)
+                  000103b8    00000018     rts430x_lc_rd_eabi.lib : mult16_f5hw.obj (.text)
+                  000103d0    00000014     main.obj (.text:joystick_Init)
+                  000103e4    00000014     rts430x_lc_rd_eabi.lib : memcpy.obj (.text:memcpy)
+                  000103f8    00000012                            : copy_decompress_none.obj (.text:decompress:none:__TI_decompress_none)
+                  0001040a    0000000e     main.obj (.text:led_Init)
+                  00010418    00000008     main.obj (.text:button_Init)
+                  00010420    00000006     rts430x_lc_rd_eabi.lib : exit.obj (.text:abort)
+                  00010426    00000006                            : copy_decompress_rle.obj (.text:decompress:rle24:__TI_decompress_rle24)
+                  0001042c    00000004                            : pre_init.obj (.text:_system_pre_init)
+                  00010430    00000002                            : startup.obj (.text:_system_post_cinit)
 
 MODULE SUMMARY
 
-       Module             code   ro data   rw data
-       ------             ----   -------   -------
+       Module                     code   ro data   rw data
+       ------                     ----   -------   -------
     .\
-       main.obj           274    0         0      
-    +--+------------------+------+---------+---------+
-       Total:             274    0         0      
-                                                  
-    C:\ti\ccsv6\tools\compiler\ti-cgt-msp430_15.12.1.LTS\lib\rts430x_lc_rd_eabi.lib
-       autoinit_wdt.obj   130    0         0      
-       cpy_tbl.obj        102    0         0      
-       boot_special.obj   26     0         0      
-       mult16_f5hw.obj    24     0         0      
-       memcpy.obj         20     0         0      
-       isr_trap.obj       8      0         0      
-       exit.obj           6      0         0      
-       pre_init.obj       4      0         0      
-       boot.obj           0      2         0      
-       int41.obj          0      2         0      
-       int42.obj          0      2         0      
-       int43.obj          0      2         0      
-       int44.obj          0      2         0      
-       int45.obj          0      2         0      
-       int46.obj          0      2         0      
-       int47.obj          0      2         0      
-       int48.obj          0      2         0      
-       int49.obj          0      2         0      
-       int50.obj          0      2         0      
-       int51.obj          0      2         0      
-       int52.obj          0      2         0      
-       int53.obj          0      2         0      
-       int54.obj          0      2         0      
-       int55.obj          0      2         0      
-       int56.obj          0      2         0      
-       int57.obj          0      2         0      
-       int58.obj          0      2         0      
-       int59.obj          0      2         0      
-       int60.obj          0      2         0      
-       int61.obj          0      2         0      
-       int62.obj          0      2         0      
-       startup.obj        2      0         0      
-    +--+------------------+------+---------+---------+
-       Total:             322    46        0      
-                                                  
-       Stack:             0      0         160    
-    +--+------------------+------+---------+---------+
-       Grand Total:       596    46        160    
+       main.obj                   658    0         1      
+    +--+--------------------------+------+---------+---------+
+       Total:                     658    0         1      
+                                                          
+    C:\ti\ccsv6\tools\compiler\msp430_15.12.3.LTS\lib\rts430x_lc_rd_eabi.lib
+       autoinit_wdt.obj           130    0         0      
+       copy_decompress_rle.obj    110    0         0      
+       cpy_tbl.obj                102    0         0      
+       boot_special.obj           26     0         0      
+       mult16_f5hw.obj            24     0         0      
+       memcpy.obj                 20     0         0      
+       copy_decompress_none.obj   18     0         0      
+       isr_trap.obj               8      0         0      
+       exit.obj                   6      0         0      
+       pre_init.obj               4      0         0      
+       boot.obj                   0      2         0      
+       int41.obj                  0      2         0      
+       int42.obj                  0      2         0      
+       int43.obj                  0      2         0      
+       int44.obj                  0      2         0      
+       int45.obj                  0      2         0      
+       int46.obj                  0      2         0      
+       int47.obj                  0      2         0      
+       int48.obj                  0      2         0      
+       int49.obj                  0      2         0      
+       int50.obj                  0      2         0      
+       int51.obj                  0      2         0      
+       int52.obj                  0      2         0      
+       int53.obj                  0      2         0      
+       int54.obj                  0      2         0      
+       int55.obj                  0      2         0      
+       int56.obj                  0      2         0      
+       int57.obj                  0      2         0      
+       int58.obj                  0      2         0      
+       int59.obj                  0      2         0      
+       int60.obj                  0      2         0      
+       int61.obj                  0      2         0      
+       int62.obj                  0      2         0      
+       startup.obj                2      0         0      
+    +--+--------------------------+------+---------+---------+
+       Total:                     450    46        0      
+                                                          
+       Stack:                     0      0         160    
+       Linker Generated:          0      23        0      
+    +--+--------------------------+------+---------+---------+
+       Grand Total:               1108   69        161    
+
+
+LINKER GENERATED COPY TABLES
+
+__TI_cinit_table @ 00005c32 records: 1, size/record: 8, table size: 8
+	.data: load addr=00005c2a, load size=00000007 bytes, run addr=00001c00, run size=00000001 bytes, compression=rle
+
+
+LINKER GENERATED HANDLER TABLE
+
+__TI_handler_table @ 00005c22 records: 2, size/record: 4, table size: 8
+	index: 0, handler: __TI_decompress_rle24
+	index: 1, handler: __TI_decompress_none
 
 
 GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name 
@@ -331,7 +358,7 @@ address   name
 00000732  ADC12MEM9               
 00000733  ADC12MEM9_H             
 00000732  ADC12MEM9_L             
-00010226  C$$EXIT                 
+00010420  C$$EXIT                 
 00000150  CRCDI                   
 00000152  CRCDIRB                 
 00000153  CRCDIRB_H               
@@ -934,13 +961,15 @@ address   name
 000000a0  __STACK_SIZE            
 UNDEFED   __TI_BINIT_Base         
 UNDEFED   __TI_BINIT_Limit        
-UNDEFED   __TI_CINIT_Base         
-UNDEFED   __TI_CINIT_Limit        
-UNDEFED   __TI_Handler_Table_Base 
-UNDEFED   __TI_Handler_Table_Limit
+00005c32  __TI_CINIT_Base         
+00005c3a  __TI_CINIT_Limit        
+00005c22  __TI_Handler_Table_Base 
+00005c2a  __TI_Handler_Table_Limit
 UNDEFED   __TI_INITARRAY_Base     
 UNDEFED   __TI_INITARRAY_Limit    
 00005c1a  __TI_ISR_TRAP           
+000103f8  __TI_decompress_none    
+00010426  __TI_decompress_rle24   
 0000ffd2  __TI_int41              
 0000ffd4  __TI_int42              
 0000ffd6  __TI_int43              
@@ -967,21 +996,23 @@ ffffffff  __TI_pprof_out_hndl
 ffffffff  __TI_prof_data_size     
 ffffffff  __TI_prof_data_start    
 ffffffff  __c_args__              
-000101dc  __mspabi_mpyi_f5hw      
-000100c0  _auto_init_hold_wdt     
+000103b8  __mspabi_mpyi_f5hw      
+0001021a  _auto_init_hold_wdt     
 00005c00  _c_int00_noargs_noexit  
 0000fffe  _reset_vector           
 00005b60  _stack                  
-00010230  _system_post_cinit      
-0001022c  _system_pre_init        
-00010226  abort                   
-00010216  button_Init             
-00010142  copy_in                 
-0001021e  joystick_Init           
-000101a8  led_Blink               
-00010208  led_Init                
+00010430  _system_post_cinit      
+0001042c  _system_pre_init        
+00010420  abort                   
+00010418  button_Init             
+00010304  copy_in                 
+00001c00  counter                 
+000103d0  joystick_Init           
+0001036a  led_Blink               
+0001040a  led_Init                
 00010000  main                    
-000101f4  memcpy                  
+000103e4  memcpy                  
+0001039a  reset_Lock              
 
 
 GLOBAL SYMBOLS: SORTED BY Symbol Address 
@@ -1669,10 +1700,15 @@ address   name
 0000073e  ADC12MEM15              
 0000073e  ADC12MEM15_L            
 0000073f  ADC12MEM15_H            
+00001c00  counter                 
 00005b60  _stack                  
 00005c00  __STACK_END             
 00005c00  _c_int00_noargs_noexit  
 00005c1a  __TI_ISR_TRAP           
+00005c22  __TI_Handler_Table_Base 
+00005c2a  __TI_Handler_Table_Limit
+00005c32  __TI_CINIT_Base         
+00005c3a  __TI_CINIT_Limit        
 0000ffd2  __TI_int41              
 0000ffd4  __TI_int42              
 0000ffd6  __TI_int43              
@@ -1697,29 +1733,28 @@ address   name
 0000fffc  __TI_int62              
 0000fffe  _reset_vector           
 00010000  main                    
-000100c0  _auto_init_hold_wdt     
-00010142  copy_in                 
-000101a8  led_Blink               
-000101dc  __mspabi_mpyi_f5hw      
-000101f4  memcpy                  
-00010208  led_Init                
-00010216  button_Init             
-0001021e  joystick_Init           
-00010226  C$$EXIT                 
-00010226  abort                   
-0001022c  _system_pre_init        
-00010230  _system_post_cinit      
+0001021a  _auto_init_hold_wdt     
+00010304  copy_in                 
+0001036a  led_Blink               
+0001039a  reset_Lock              
+000103b8  __mspabi_mpyi_f5hw      
+000103d0  joystick_Init           
+000103e4  memcpy                  
+000103f8  __TI_decompress_none    
+0001040a  led_Init                
+00010418  button_Init             
+00010420  C$$EXIT                 
+00010420  abort                   
+00010426  __TI_decompress_rle24   
+0001042c  _system_pre_init        
+00010430  _system_post_cinit      
 ffffffff  __TI_pprof_out_hndl     
 ffffffff  __TI_prof_data_size     
 ffffffff  __TI_prof_data_start    
 ffffffff  __c_args__              
 UNDEFED   __TI_BINIT_Base         
 UNDEFED   __TI_BINIT_Limit        
-UNDEFED   __TI_CINIT_Base         
-UNDEFED   __TI_CINIT_Limit        
-UNDEFED   __TI_Handler_Table_Base 
-UNDEFED   __TI_Handler_Table_Limit
 UNDEFED   __TI_INITARRAY_Base     
 UNDEFED   __TI_INITARRAY_Limit    
 
-[733 symbols]
+[737 symbols]
