@@ -154,11 +154,11 @@ void initialize_UART(bool baud_Rate, uint8_t pin_Setting) {
 	}
 }
 
-void write_UART(uint32_t TX_Data, uint8_t pin_Setting) {
+void write_UART(uint8_t TX_Data, uint8_t pin_Setting) {
 	switch (pin_Setting) {
 	default:
 	case 0:
-		while (!(UCA0IFG & UCTXIFG)) {};					// If able to TX
+/*		while (!(UCA0IFG & UCTXIFG)) {};					// If able to TX
 		UCA0TXBUF = TX_Data >> 24;							// 8 bits transmitted (1st byte)
 
 		while (!(UCA0IFG & UCTXIFG)) {};					// If able to TX
@@ -166,7 +166,7 @@ void write_UART(uint32_t TX_Data, uint8_t pin_Setting) {
 
 		while (!(UCA0IFG & UCTXIFG)) {};					// If able to TX
 		UCA0TXBUF = TX_Data >> 8;							// 8 bits transmitted (3rd byte)
-
+*/
 		while (!(UCA0IFG & UCTXIFG)) {};					// If able to TX
 		UCA0TXBUF = TX_Data;								// 8 bits transmitted (4th byte)
 		break;

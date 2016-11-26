@@ -9,7 +9,7 @@
 #define UART_H_
 
 void init_UART (bool baud_Rate, bool pin_Setting);		// initalizes UART clk rate and which pins are being used
-void write_UART (uint32_t TX_Data, uint8_t pin_Setting);	// writes 32 bits with UART
+void write_UART (uint8_t TX_Data, uint8_t pin_Setting);	// writes 8 bits with UART
 uint8_t read_UART (void);
 
 #endif /* UART_H_ */
