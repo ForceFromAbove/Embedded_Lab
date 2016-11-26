@@ -13,37 +13,37 @@ enum UART_States { RX_Data, convert_Data, TX_Data } UART_State;
 void TickFct_UART() {
 	switch(UART_State) {   // Transitions
   	case RX_Data:
-  		if (state == 0) {
+  		if (state == 0) {					// RX state
   			UART_State = RX_Data;
   		}
-  		if (state == 1) {
+  		if (state == 1) {					// convert state
   		  	UART_State = convert_Data;
   		}
-  		if (state == 2) {
+  		if (state == 2) {					// TX state
   			UART_State = TX_Data;
   		}
   		break;
 
   	case convert_Data:
-		if (state == 0) {
+		if (state == 0) {					// RX state
 			UART_State = RX_Data;
 		}
-		if (state == 1) {
+		if (state == 1) {					// convert state
 			UART_State = convert_Data;
 		}
-		if (state == 2) {
+		if (state == 2) {					// TX state
 			UART_State = TX_Data;
 		}
 		break;
 
 	case TX_Data:
-		if (state == 0) {
+		if (state == 0) {					// RX state
 			UART_State = RX_Data;
 		}
-		if (state == 1) {
+		if (state == 1) {					// convert state
 		  	UART_State = convert_Data;
 		}
-		if (state == 2) {
+		if (state == 2) {					// TX state
 			UART_State = TX_Data;
 		}
 		break;
@@ -62,7 +62,7 @@ void TickFct_UART() {
 			if (RXData >= 0x61 && RXData <= 0x7A) {		// if 'a' to 'z'
 				TXData = RXData - 0x20;					// capitalize letter
 			} else {
-				TXData = RXData;						// do nothing to input
+				TXData = RXData;						// do not change input
 			}
 			state = 2;
 			break;
@@ -81,7 +81,7 @@ void TickFct_UART() {
 enum LED_States { no_LED, LED } LED_State;
 void TickFct_LED() {
 	switch(LED_State) {   // Transitions
-	case no_LED:  				// Wait for UART input
+	case no_LED:  				// do not turn on LED
 		 if (LED_Flag) {
 			LED_State = LED;
 		 } else {
@@ -90,7 +90,7 @@ void TickFct_LED() {
 		 break;
 
 	case LED:
-	if (LED_Flag) {
+	if (LED_Flag) {				// turn on LED
 		LED_State = LED;
 	} else {
 		LED_State = no_LED;
@@ -115,8 +115,8 @@ int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
 
     initialize_LED();			// initialize LEDs
-    initialize_UART(0,0);		// initialize UART connection (for PC output)
-    initialize_Interrupts();	// sets up and enables all interrupts
+    initialize_UART(0,0);		// initialize UART connection (for PC input/output)
+    initialize_Interrupts();	// sets up and enables UART interrupt
 
     while (1) {					// run state machine
     	TickFct_UART();
@@ -132,7 +132,7 @@ __interrupt void USCI_A0_ISR(void) {
     while (!(UCA0IFG & UCTXIFG));           // USCI_A0 TX buffer ready?
     RXData = UCA0RXBUF;                  	// TX -> RXData
 
-    state = 1;
+    state = 1;								// turn on LED and go to convert state
     LED_Flag = 1;
     break;
   case 4:break;                             // Vector 4 - TXIFG
