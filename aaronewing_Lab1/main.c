@@ -106,14 +106,13 @@ int main(void) {
     	} if (P2IN == 0xFB && counter == 8) { // Right and counter is on 8th entry
 
     		P1OUT |= BIT1;					// turn on LED 2
-    		led_Blink(0);					// blink LED 1
+    		__delay_cycles(20000);			// keep LED 2 on
     		counter = 1;					// reset counter
     		while (P2IN == 0xFF) {};		// wait for user input on joystick
     		P1OUT &= ~BIT1;					// turn off LED 2
 
     	// if lock is wrong
 
- //   	} if (counter == 1 && !(P2IN == 0xEF || P2IN == 0xFF)) {		// if 1st entry is wrong
     	} if (counter == 1 && !(P2IN == 0xEF || P2IN == 0xFF)) {		// if 1st entry is wrong
 
     		reset_Lock();			// resets Lock
@@ -145,59 +144,6 @@ int main(void) {
     	} if (counter == 8 && !(P2IN == 0xFB || P2IN == 0xFF)) {		// if 8th entry is wrong
 
         	reset_Lock();			// resets Lock
-
-    	} if (P2IN == 0xFF) {				// no input yet
-
-    		// do nothing
-
-    	} else {								// start over because wrong code
-//    		reset_Lock();
     	}
     }
 }
-
-
-/*
-	while (1) {
-//		switch (P2OUT) {
-		if (P2OUT == BIT1) {	// LEFT
-			led_Blink(0);
-		}
-		if (P2OUT == BIT2) {	// RIGHT
-			led_Blink(0);
-		}
-		if (P2OUT == BIT3) {	// CENTER
-			led_Blink(0);
-		}
-		if (P2OUT == BIT4) {	// UP
-			led_Blink(0);
-			while (P2OUT &= ~BIT4) {
-				if (P2OUT == BIT4) {	// UP again
-					led_Blink(0);
-					while (P2OUT &= ~BIT4) {
-						if (P2OUT == BIT1) {	// LEFT
-						led_Blink(0);
-						while (P2OUT &= ~BIT1) {
-							if (P2OUT == BIT2) {	// RIGHT again
-							led_Blink(0);
-							while (P2OUT &= ~BIT2) {
-								if (P2OUT == BIT4) {	// LEFT again
-									P1OUT |= BIT1;
-									led_Blink(0);
-								}
-							}
-							}
-						}
-						}
-					}
-				}
-			}
-		}
-		if (P2OUT == BIT5) {	// DOWN
-			led_Blink(0);
-		} else {
-//			led_Blink(0);
-		}
-//	}
-	}
-} */
