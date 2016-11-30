@@ -1,7 +1,7 @@
 ******************************************************************************
                   MSP430 Linker PC v15.12.3                    
 ******************************************************************************
->> Linked Sat Nov 26 01:23:00 2016
+>> Linked Mon Nov 28 11:45:15 2016
 
 OUTPUT FILE NAME:   <aaronewing_Lab4.out>
 ENTRY POINT SYMBOL: "_c_int00_noargs_noexit"  address: 00005c1c

@@ -154,7 +154,7 @@ void initialize_UART(bool baud_Rate, uint8_t pin_Setting) {
 	}
 }
 
-void write_UART(uint32_t TX_Data, uint8_t pin_Setting) {
+void write_UART(uint8_t TX_Data, uint8_t pin_Setting) {
 	switch (pin_Setting) {
 	default:
 	case 0:

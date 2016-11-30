@@ -12,6 +12,13 @@
 #define DOWN 0xDF
 #define no_Input 0xFF
 
+bool LEFT_Flag = 0;
+bool RIGHT_Flag = 0;
+bool CENTER_Flag = 0;
+bool UP_Flag = 0;
+bool DOWN_Flag = 0;
+bool SW2_Flag = 0;
+
 void led_Init(void) {
 	P1DIR |= BIT0 | BIT1;		// Sets P1.0 and P1.1 as output (LED1 and LED2)
 	P1OUT &= ~(BIT0 | BIT1);	// Turns LEDs off
@@ -31,11 +38,10 @@ void led_Blink(led_1or2) {
 
 void joystick_Init(void) {
 		P2DIR &= ~(LEFT | RIGHT | CENTER | UP | DOWN);	// Sets up joystick as input
-	// P2.1 - LEFT, P2.2 - RIGHT, P2.3 - CENTER, P2.4 - UP, DOWN - P2.5
-	// 0 if pushed, 1 if not.
+					// P2.1 - LEFT, P2.2 - RIGHT, P2.3 - CENTER, P2.4 - UP, DOWN - P2.5
+					// 0 if pushed, 1 if not.
 		P2REN |= LEFT | RIGHT | CENTER | UP | DOWN;
 		P2OUT |= LEFT | RIGHT | CENTER | UP | DOWN;
-
 }
 
 void button_Init(void) {
@@ -175,58 +181,180 @@ void TickFct_Latch() {
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
 
-    bool led_1or2 = 0;			// init var, LEDs, joysticks, and buttons
     led_Init();
     joystick_Init();
     button_Init();
 
-    while (1) {					// run state machine
-    	TickFct_Latch();
-    }
+    // The LOCK is UP DOWN UP DOWN LEFT RIGHT LEFT RIGHT
 
-    // The LOCK is UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT
-	
-	while (1) {
-//		switch (P2OUT) {
-		if (P2OUT == BIT1) {	// LEFT
+    while (1) {
+
+    	// if lock is correct
+
+		if (P2IN == 0xEF && counter == 1) { // Up and counter is on 1st entry
+
 			led_Blink(0);
-		}
-		if (P2OUT == BIT2) {	// RIGHT
+			counter = 2;					// blink LED and move to next entry
+
+			while (P2IN != 0xFF) {};		// wait until no user input
+
+		} if (P2IN == 0xDF && counter == 2) { // Down and counter is on 2nd entry
+
 			led_Blink(0);
-		}
-		if (P2OUT == BIT3) {	// CENTER
+			counter = 3;					// blink LED and move to next entry
+
+			while (P2IN != 0xFF) {};		// wait until no user input
+
+		} if (P2IN == 0xEF && counter == 3) { // Up and counter is on 3rd entry
+
 			led_Blink(0);
-		}
-		if (P2OUT == BIT4) {	// UP
+			counter = 4;					// blink LED and move to next entry
+
+			while (P2IN != 0xFF) {};		// wait until no user input
+
+		} if (P2IN == 0xDF && counter == 4) { // Down and counter is on 4th entry
+
 			led_Blink(0);
-			while (P2OUT &= ~BIT4) {
-				if (P2OUT == BIT4) {	// UP again
-					led_Blink(0);
-					while (P2OUT &= ~BIT4) {
-						if (P2OUT == BIT1) {	// LEFT
-						led_Blink(0);
-						while (P2OUT &= ~BIT1) {
-							if (P2OUT == BIT2) {	// RIGHT again
-							led_Blink(0);
-							while (P2OUT &= ~BIT2) {
-								if (P2OUT == BIT4) {	// LEFT again
-									P1OUT |= BIT1;
-									led_Blink(0);
-								}
-							}
-							}
-						}
-						}
-					}
-				}
-			}
-		}
-		if (P2OUT == BIT5) {	// DOWN
+			counter = 5;					// blink LED and move to next entry
+
+			while (P2IN != 0xFF) {};		// wait until no user input
+
+		} if (P2IN == 0xFD && counter == 5) { // Left and counter is on 5th entry
+
 			led_Blink(0);
-		} else {
-			led_Blink(0);
-		}
-//	}
+			counter = 6;					// blink LED and move to next entry
+
+			while (P2IN != 0xFF) {};		// wait until no user input
+
+    	} if (P2IN == 0xFB && counter == 6) { // Right and counter is on 6th entry
+
+    		led_Blink(0);
+    		counter = 7;					// blink LED and move to next entry
+
+    		while (P2IN != 0xFF) {};		// wait until no user input
+
+    	} if (P2IN == 0xFD && counter == 7) { // Left and counter is on 7th entry
+
+    		led_Blink(0);
+    		counter = 8;					// blink LED and move to next entry
+
+    		while (P2IN != 0xFF) {};		// wait until no user input
+
+    	} if (P2IN == 0xFB && counter == 8) { // Right and counter is on 8th entry
+
+    		P1OUT |= BIT1;					// turn on LED 2
+    		__delay_cycles(20000);			// keep LED 2 on
+    		counter = 1;					// reset counter
+    		while (P2IN == 0xFF) {};		// wait for user input on joystick
+    		P1OUT &= ~BIT1;					// turn off LED 2
+
+    	// if lock is wrong
+
+    	} if (counter == 1 && !(P2IN == 0xEF || P2IN == 0xFF)) {		// if 1st entry is wrong
+
+    		reset_Lock();			// resets Lock
+
+		} if (counter == 2 && !(P2IN == 0xDF || P2IN == 0xFF)) {		// if 2nd entry is wrong
+
+			reset_Lock();			// resets Lock
+
+    	} if (counter == 3 && !(P2IN == 0xEF || P2IN == 0xFF)) {		// if 3rd entry is wrong
+
+    		reset_Lock();			// resets Lock
+
+    	} if (counter == 4 && !(P2IN == 0xDF || P2IN == 0xFF)) {		// if 4th entry is wrong
+
+    		reset_Lock();			// resets Lock
+
+    	} if (counter == 5 && !(P2IN == 0xFD || P2IN == 0xFF)) {		// if 5th entry is wrong
+
+    		reset_Lock();			// resets Lock
+
+    	} if (counter == 6 && !(P2IN == 0xFB || P2IN == 0xFF)) {		// if 6th entry is wrong
+
+       		reset_Lock();			// resets Lock
+
+    	} if (counter == 7 && !(P2IN == 0xFD || P2IN == 0xFF)) {		// if 7th entry is wrong
+
+    		reset_Lock();			// resets Lock
+
+    	} if (counter == 8 && !(P2IN == 0xFB || P2IN == 0xFF)) {		// if 8th entry is wrong
+
+        	reset_Lock();			// resets Lock
+    	}
+    }
+}
+
+// Port 2 interrupt service routine for Switch 2/joystick
+#pragma vector=PORT2_VECTOR
+__interrupt void Port_2(void) {
+	switch (__even_in_range(P2IV, 14)) {
+	case 2: 							// P2.0
+		break;
+	case 4:								// P2.1
+		LEFT_Flag = 1;
+
+		RIGHT_Flag = 0;
+		CENTER_Flag = 0;
+		UP_Flag = 0;
+		DOWN_Flag = 0;
+		SW2_Flag = 0;
+		break;
+
+	case 6:								// P2.2
+		RIGHT_Flag = 1;
+
+		LEFT_Flag = 0;
+		CENTER_Flag = 0;
+		UP_Flag = 0;
+		DOWN_Flag = 0;
+		SW2_Flag = 0;
+		break;
+
+	case 8:								// P2.3
+		CENTER_Flag = 1;
+
+		LEFT_Flag = 0;
+		RIGHT_Flag = 0;
+		UP_Flag = 0;
+		DOWN_Flag = 0;
+		SW2_Flag = 0;
+		break;
+
+	case 10:							// P2.4
+		UP_Flag = 1;
+
+		LEFT_Flag = 0;
+		RIGHT_Flag = 0;
+		CENTER_Flag = 0;
+		DOWN_Flag = 0;
+		SW2_Flag = 0;
+		break;
+
+	case 12:							// P2.5
+		DOWN_Flag = 1;
+
+		LEFT_Flag = 0;
+		RIGHT_Flag = 0;
+		CENTER_Flag = 0;
+		UP_Flag = 0;
+		SW2_Flag = 0;
+		break;
+
+	case 14:							// P2.6
+		break;
+	case 16:							// P2.7
+		SW2_Flag = 1;
+
+		LEFT_Flag = 0;
+		RIGHT_Flag = 0;
+		CENTER_Flag = 0;
+		UP_Flag = 0;
+		DOWN_Flag = 0;
+		break;
+
+	default:
+		break;
 	}
 }
 
